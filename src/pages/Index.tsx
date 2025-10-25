@@ -4,7 +4,18 @@ import { FeedbackCard } from '@/components/FeedbackCard';
 import { ResultModal } from '@/components/ResultModal';
 import { codeExamples, CodeExample } from '@/data/codeExamples';
 import { Progress } from '@/components/ui/progress';
-import { Shield, AlertTriangle, Clock } from 'lucide-react';
+import { Shield, AlertTriangle, Clock, X } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -15,6 +26,7 @@ const Index = () => {
   const [startTime, setStartTime] = useState<number>(Date.now());
   const [elapsedTime, setElapsedTime] = useState(0);
   const [finalScore, setFinalScore] = useState(0);
+  const [showEndDialog, setShowEndDialog] = useState(false);
 
   const shuffledExamples = useState(() => 
     [...codeExamples].sort(() => Math.random() - 0.5)
@@ -82,6 +94,14 @@ const Index = () => {
     setFinalScore(0);
   };
 
+  const handleEndGame = () => {
+    const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+    const calculatedScore = calculateScore(score, currentIndex, timeTaken);
+    setFinalScore(calculatedScore);
+    setShowEndDialog(false);
+    setShowResults(true);
+  };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -99,9 +119,20 @@ const Index = () => {
       {/* Header */}
       <div className="w-full max-w-md mb-8 space-y-4 z-10">
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-foreground bg-clip-text">
-            🔍 NPM Imposters
-          </h1>
+          <div className="flex items-center justify-between">
+            <div className="w-10" /> {/* Spacer for centering */}
+            <h1 className="text-4xl font-bold text-foreground bg-clip-text">
+              🔍 NPM Imposters
+            </h1>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowEndDialog(true)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
           <p className="text-muted-foreground">
             Swipe to detect malicious code
           </p>
@@ -178,12 +209,30 @@ const Index = () => {
       {showResults && (
         <ResultModal
           score={score}
-          total={shuffledExamples.length}
+          total={showResults && currentIndex === shuffledExamples.length ? shuffledExamples.length : currentIndex}
           finalScore={finalScore}
           timeTaken={elapsedTime}
           onRestart={handleRestart}
         />
       )}
+
+      {/* End game confirmation dialog */}
+      <AlertDialog open={showEndDialog} onOpenChange={setShowEndDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>End Game Early?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to end the game now? Your score will be calculated based on your current progress ({score} correct out of {currentIndex} reviewed).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Continue Playing</AlertDialogCancel>
+            <AlertDialogAction onClick={handleEndGame} className="bg-malware hover:bg-malware/90">
+              End Game
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
