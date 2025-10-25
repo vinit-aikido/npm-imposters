@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Circle, Triangle, Square, Play } from 'lucide-react';
+import { z } from 'zod';
 
 const PLAYER_SYMBOLS = [
   { id: 'circle', icon: Circle, name: 'Circle', color: 'text-pink-500' },
@@ -10,14 +12,45 @@ const PLAYER_SYMBOLS = [
   { id: 'square', icon: Square, name: 'Square', color: 'text-cyan-500' },
 ];
 
+const playerSchema = z.object({
+  firstName: z.string().trim().max(50).optional(),
+  lastName: z.string().trim().max(50).optional(),
+  email: z.string().trim().email().max(255).optional().or(z.literal('')),
+});
+
 export const Home = () => {
   const [selectedSymbol, setSelectedSymbol] = useState<string>('circle');
   const [playerNumber, setPlayerNumber] = useState<string>('456');
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [errors, setErrors] = useState<{ firstName?: string; lastName?: string; email?: string }>({});
   const navigate = useNavigate();
 
   const handleStart = () => {
+    // Validate optional fields if provided
+    const validation = playerSchema.safeParse({
+      firstName: firstName || undefined,
+      lastName: lastName || undefined,
+      email: email || undefined,
+    });
+
+    if (!validation.success) {
+      const fieldErrors: { firstName?: string; lastName?: string; email?: string } = {};
+      validation.error.errors.forEach((err) => {
+        const field = err.path[0] as 'firstName' | 'lastName' | 'email';
+        fieldErrors[field] = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setErrors({});
     localStorage.setItem('playerSymbol', selectedSymbol);
     localStorage.setItem('playerNumber', playerNumber);
+    localStorage.setItem('playerFirstName', firstName);
+    localStorage.setItem('playerLastName', lastName);
+    localStorage.setItem('playerEmail', email);
     navigate('/game');
   };
 
@@ -49,6 +82,61 @@ export const Home = () => {
         {/* Player Setup Card */}
         <Card className="p-8 bg-gradient-to-br from-secondary to-secondary/50 border-2 border-border animate-scale-in">
           <div className="space-y-6">
+            {/* Player Details */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    First Name <span className="text-muted-foreground text-xs">(optional)</span>
+                  </label>
+                  <Input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value.slice(0, 50))}
+                    maxLength={50}
+                    placeholder="Enter first name"
+                    className={`bg-background border-2 ${errors.firstName ? 'border-destructive' : 'border-border'}`}
+                  />
+                  {errors.firstName && (
+                    <p className="text-xs text-destructive">{errors.firstName}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Last Name <span className="text-muted-foreground text-xs">(optional)</span>
+                  </label>
+                  <Input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value.slice(0, 50))}
+                    maxLength={50}
+                    placeholder="Enter last name"
+                    className={`bg-background border-2 ${errors.lastName ? 'border-destructive' : 'border-border'}`}
+                  />
+                  {errors.lastName && (
+                    <p className="text-xs text-destructive">{errors.lastName}</p>
+                  )}
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Email Address <span className="text-muted-foreground text-xs">(optional)</span>
+                </label>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value.slice(0, 255))}
+                  maxLength={255}
+                  placeholder="player@example.com"
+                  className={`bg-background border-2 ${errors.email ? 'border-destructive' : 'border-border'}`}
+                />
+                {errors.email && (
+                  <p className="text-xs text-destructive">{errors.email}</p>
+                )}
+              </div>
+            </div>
+
             {/* Player Number */}
             <div className="space-y-3">
               <label className="text-sm font-medium text-foreground">
