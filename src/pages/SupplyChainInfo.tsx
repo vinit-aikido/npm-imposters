@@ -127,7 +127,7 @@ init();`
         </div>
         
         <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-pink-400">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text md:text-[db2777] text-[#dd2878]">
             Common npm Supply Chain Threats
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
