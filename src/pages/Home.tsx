@@ -108,7 +108,7 @@ export const Home = () => {
       localStorage.setItem('playerEmail', email);
       localStorage.setItem('jeopardyMode', jeopardyMode.toString());
       
-      navigate('/game');
+      navigate('/learn');
     } catch (error) {
       console.error('Error:', error);
       toast({

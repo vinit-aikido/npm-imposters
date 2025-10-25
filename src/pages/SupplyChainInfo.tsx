@@ -134,7 +134,7 @@ init();`
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/setup")}
             className="gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -192,10 +192,10 @@ init();`
         <div className="flex justify-center pt-6">
           <Button 
             size="lg" 
-            onClick={() => navigate("/setup")}
+            onClick={() => navigate("/game")}
             className="min-w-[200px]"
           >
-            Continue to Setup
+            Start Game
           </Button>
         </div>
       </div>
