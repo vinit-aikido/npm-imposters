@@ -94,7 +94,7 @@ export const Landing = () => {
 
         {/* CTA Button */}
         <div className="space-y-4 animate-scale-in">
-          <Button onClick={() => navigate('/setup')} size="lg" className="text-2xl px-12 py-8 bg-gradient-to-r from-pink-600 to-pink-500 hover:from-pink-700 hover:to-pink-600 text-white font-bold shadow-2xl shadow-pink-500/50 hover:shadow-pink-500/70 transition-all hover:scale-105">
+          <Button onClick={() => navigate('/learn')} size="lg" className="text-2xl px-12 py-8 bg-gradient-to-r from-pink-600 to-pink-500 hover:from-pink-700 hover:to-pink-600 text-white font-bold shadow-2xl shadow-pink-500/50 hover:shadow-pink-500/70 transition-all hover:scale-105">
             <Play className="w-8 h-8 mr-3" />
             Enter Game
           </Button>
