@@ -191,51 +191,51 @@ export const ResultModal = ({ score, total, finalScore, timeTaken, onRestart, sh
   const message = getMessage();
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="w-full max-w-4xl py-8">
-        <Card className="p-8 bg-gradient-to-br from-secondary to-secondary/50 border-2 border-border mb-6">
-          <div className="text-center space-y-6">
-            <h2 className={`text-4xl font-bold ${message.color}`}>
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-start justify-center z-50 p-2 sm:p-4 overflow-y-auto">
+      <div className="w-full max-w-4xl py-4 sm:py-8">
+        <Card className="p-4 sm:p-8 bg-gradient-to-br from-secondary to-secondary/50 border-2 border-border mb-4 sm:mb-6">
+          <div className="text-center space-y-4 sm:space-y-6">
+            <h2 className={`text-2xl sm:text-4xl font-bold ${message.color}`}>
               {message.text}
             </h2>
             
             <div className="space-y-4">
               <div className="relative">
-                <Trophy className="w-16 h-16 text-primary mx-auto mb-2" />
-                <div className="text-6xl font-bold text-foreground">
+                <Trophy className="w-12 h-12 sm:w-16 sm:h-16 text-primary mx-auto mb-2" />
+                <div className="text-4xl sm:text-6xl font-bold text-foreground">
                   {finalScore}
                 </div>
-                <p className="text-sm text-muted-foreground">out of 1000 points</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">out of 1000 points</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 pt-4">
-              <div className="bg-safe/10 p-4 rounded-lg border border-safe/30">
-                <CheckCircle2 className="w-6 h-6 text-safe mx-auto mb-2" />
-                <div className="text-2xl font-bold text-safe">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-4">
+              <div className="bg-safe/10 p-2 sm:p-4 rounded-lg border border-safe/30">
+                <CheckCircle2 className="w-4 h-4 sm:w-6 sm:h-6 text-safe mx-auto mb-1 sm:mb-2" />
+                <div className="text-lg sm:text-2xl font-bold text-safe">
                   {score}
                 </div>
-                <p className="text-xs text-muted-foreground">Correct</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Correct</p>
               </div>
-              <div className="bg-malware/10 p-4 rounded-lg border border-malware/30">
-                <XCircle className="w-6 h-6 text-malware mx-auto mb-2" />
-                <div className="text-2xl font-bold text-malware">
+              <div className="bg-malware/10 p-2 sm:p-4 rounded-lg border border-malware/30">
+                <XCircle className="w-4 h-4 sm:w-6 sm:h-6 text-malware mx-auto mb-1 sm:mb-2" />
+                <div className="text-lg sm:text-2xl font-bold text-malware">
                   {total - score}
                 </div>
-                <p className="text-xs text-muted-foreground">Wrong</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Wrong</p>
               </div>
-              <div className="bg-primary/10 p-4 rounded-lg border border-primary/30">
-                <Clock className="w-6 h-6 text-primary mx-auto mb-2" />
-                <div className="text-2xl font-bold text-primary font-mono">
+              <div className="bg-primary/10 p-2 sm:p-4 rounded-lg border border-primary/30">
+                <Clock className="w-4 h-4 sm:w-6 sm:h-6 text-primary mx-auto mb-1 sm:mb-2" />
+                <div className="text-lg sm:text-2xl font-bold text-primary font-mono">
                   {formatTime(timeTaken)}
                 </div>
-                <p className="text-xs text-muted-foreground">Time</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Time</p>
               </div>
             </div>
 
-            <div className="text-sm text-muted-foreground space-y-1">
+            <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
               <p>{percentage.toFixed(0)}% Accuracy Rate</p>
-              <p className="text-xs">Score = Accuracy (60%) + Speed Bonus (40%)</p>
+              <p className="text-[10px] sm:text-xs">Score = Accuracy (60%) + Speed Bonus (40%)</p>
             </div>
 
             <Button 
@@ -243,7 +243,7 @@ export const ResultModal = ({ score, total, finalScore, timeTaken, onRestart, sh
               className="w-full bg-pink-600 hover:bg-pink-700 text-white"
               size="lg"
             >
-              <RotateCcw className="w-5 h-5 mr-2" />
+              <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Return to Lobby
             </Button>
           </div>
@@ -251,104 +251,102 @@ export const ResultModal = ({ score, total, finalScore, timeTaken, onRestart, sh
 
         {/* Malware Examples Review */}
         {malwareExamples.length > 0 && (
-          <Card className="p-8 bg-gradient-to-br from-secondary to-secondary/50 border-2 border-border">
+          <Card className="p-4 sm:p-8 bg-gradient-to-br from-secondary to-secondary/50 border-2 border-border">
             <div className="space-y-4">
-              <div className="flex items-center gap-3 mb-6">
-                <AlertTriangle className="w-8 h-8 text-malware" />
+              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <AlertTriangle className="w-6 h-6 sm:w-8 sm:h-8 text-malware flex-shrink-0" />
                 <div>
-                  <h3 className="text-2xl font-bold text-foreground">Malware Packages Review</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="text-xl sm:text-2xl font-bold text-foreground">Malware Packages Review</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     {malwareExamples.length} malicious package{malwareExamples.length !== 1 ? 's' : ''} detected in this game
                   </p>
                 </div>
               </div>
 
-              <ScrollArea className="h-[400px] pr-4">
-                <div className="space-y-4">
-                  {malwareExamples.map((example, index) => {
-                    const explanations = getDetailedExplanation(example);
-                    const isExpanded = expandedId === example.id;
-                    
-                    return (
-                      <div 
-                        key={example.id}
-                        className="bg-background/50 rounded-lg border-2 border-malware/30 overflow-hidden transition-all hover:border-malware/50 cursor-pointer"
-                        onClick={() => setExpandedId(isExpanded ? null : example.id)}
-                      >
-                        <div className="p-4 space-y-2">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-lg font-bold text-malware">#{index + 1}</span>
-                                <h4 className="text-lg font-mono font-bold text-foreground">
-                                  {example.packageName}
-                                </h4>
-                                {example.severity && (
-                                  <span className={`text-xs px-2 py-1 rounded uppercase font-bold ${
-                                    example.severity === 'critical' ? 'bg-malware/20 text-malware' :
-                                    example.severity === 'high' ? 'bg-orange-500/20 text-orange-500' :
-                                    'bg-yellow-500/20 text-yellow-500'
-                                  }`}>
-                                    {example.severity}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-sm text-muted-foreground leading-relaxed mb-2">
-                                {explanations.summary}
-                              </p>
-                              {example.cveId && (
-                                <p className="text-xs text-muted-foreground font-mono">
-                                  CVE: {example.cveId}
-                                </p>
+              <div className="space-y-3 sm:space-y-4 max-h-[500px] sm:max-h-[600px] overflow-y-auto pr-2">
+                {malwareExamples.map((example, index) => {
+                  const explanations = getDetailedExplanation(example);
+                  const isExpanded = expandedId === example.id;
+                  
+                  return (
+                    <div 
+                      key={example.id}
+                      className="bg-background/50 rounded-lg border-2 border-malware/30 overflow-hidden transition-all hover:border-malware/50 cursor-pointer"
+                      onClick={() => setExpandedId(isExpanded ? null : example.id)}
+                    >
+                      <div className="p-3 sm:p-4 space-y-2">
+                        <div className="flex items-start justify-between gap-2 sm:gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <span className="text-base sm:text-lg font-bold text-malware">#{index + 1}</span>
+                              <h4 className="text-sm sm:text-lg font-mono font-bold text-foreground break-all">
+                                {example.packageName}
+                              </h4>
+                              {example.severity && (
+                                <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded uppercase font-bold ${
+                                  example.severity === 'critical' ? 'bg-malware/20 text-malware' :
+                                  example.severity === 'high' ? 'bg-orange-500/20 text-orange-500' :
+                                  'bg-yellow-500/20 text-yellow-500'
+                                }`}>
+                                  {example.severity}
+                                </span>
                               )}
                             </div>
-                            {isExpanded ? (
-                              <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                            ) : (
-                              <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-2">
+                              {explanations.summary}
+                            </p>
+                            {example.cveId && (
+                              <p className="text-[10px] sm:text-xs text-muted-foreground font-mono break-all">
+                                CVE: {example.cveId}
+                              </p>
                             )}
                           </div>
+                          {isExpanded ? (
+                            <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground flex-shrink-0" />
+                          )}
                         </div>
+                      </div>
 
-                        {isExpanded && (
-                          <div className="border-t-2 border-malware/30 p-4 space-y-4 bg-background/30">
-                            <div className="space-y-2">
-                              <h5 className="text-sm font-bold text-foreground">📋 How It Works</h5>
-                              <p className="text-sm text-muted-foreground leading-relaxed">
-                                {explanations.details}
-                              </p>
-                            </div>
+                      {isExpanded && (
+                        <div className="border-t-2 border-malware/30 p-3 sm:p-4 space-y-3 sm:space-y-4 bg-background/30">
+                          <div className="space-y-2">
+                            <h5 className="text-xs sm:text-sm font-bold text-foreground">📋 How It Works</h5>
+                            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                              {explanations.details}
+                            </p>
+                          </div>
 
-                            <div className="space-y-2">
-                              <h5 className="text-sm font-bold text-foreground">💡 Security Lesson</h5>
-                              <p className="text-sm text-safe leading-relaxed">
-                                {explanations.lesson}
-                              </p>
-                            </div>
+                          <div className="space-y-2">
+                            <h5 className="text-xs sm:text-sm font-bold text-foreground">💡 Security Lesson</h5>
+                            <p className="text-xs sm:text-sm text-safe leading-relaxed">
+                              {explanations.lesson}
+                            </p>
+                          </div>
 
-                            <div className="space-y-2">
-                              <h5 className="text-sm font-bold text-foreground">🔍 Vulnerable Code</h5>
-                              <pre className="bg-background/50 p-3 rounded border border-border overflow-x-auto">
-                                <code className="text-xs font-mono text-foreground whitespace-pre">
-                                  {example.code}
-                                </code>
+                          <div className="space-y-2">
+                            <h5 className="text-xs sm:text-sm font-bold text-foreground">🔍 Vulnerable Code</h5>
+                            <div className="bg-background/50 p-2 sm:p-3 rounded border border-border overflow-x-auto">
+                              <pre className="text-[10px] sm:text-xs font-mono text-foreground whitespace-pre">
+                                {example.code}
                               </pre>
                             </div>
-
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <span>Version: {example.version}</span>
-                              <span>•</span>
-                              <span>Downloads: {example.weeklyDownloads}/week</span>
-                              <span>•</span>
-                              <span>Published: {example.lastPublished}</span>
-                            </div>
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </ScrollArea>
+
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-muted-foreground">
+                            <span>v{example.version}</span>
+                            <span>•</span>
+                            <span className="truncate">{example.weeklyDownloads}/wk</span>
+                            <span>•</span>
+                            <span className="truncate">{example.lastPublished}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </Card>
         )}
