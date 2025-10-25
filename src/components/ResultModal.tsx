@@ -78,11 +78,11 @@ export const ResultModal = ({ score, total, finalScore, timeTaken, onRestart }: 
 
           <Button 
             onClick={onRestart}
-            className="w-full bg-safe hover:bg-safe/90 text-safe-foreground"
+            className="w-full bg-pink-600 hover:bg-pink-700 text-white"
             size="lg"
           >
             <RotateCcw className="w-5 h-5 mr-2" />
-            Play Again
+            Return to Lobby
           </Button>
         </div>
       </Card>

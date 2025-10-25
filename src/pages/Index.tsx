@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SwipeCard } from '@/components/SwipeCard';
 import { FeedbackCard } from '@/components/FeedbackCard';
 import { ResultModal } from '@/components/ResultModal';
 import { codeExamples, CodeExample } from '@/data/codeExamples';
 import { Progress } from '@/components/ui/progress';
-import { Shield, AlertTriangle, Clock, X } from 'lucide-react';
+import { Shield, AlertTriangle, Clock, X, Circle, Triangle, Square } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +28,8 @@ const Index = () => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [finalScore, setFinalScore] = useState(0);
   const [showEndDialog, setShowEndDialog] = useState(false);
+  const [playerNumber] = useState(() => localStorage.getItem('playerNumber') || '456');
+  const [playerSymbol] = useState(() => localStorage.getItem('playerSymbol') || 'circle');
 
   const shuffledExamples = useState(() => 
     [...codeExamples].sort(() => Math.random() - 0.5)
@@ -83,15 +86,10 @@ const Index = () => {
     return Math.round(Math.min(1000, accuracyScore + speedBonus));
   };
 
+  const navigate = useNavigate();
+
   const handleRestart = () => {
-    setCurrentIndex(0);
-    setScore(0);
-    setShowResults(false);
-    setShowFeedback(false);
-    setLastGuess(null);
-    setStartTime(Date.now());
-    setElapsedTime(0);
-    setFinalScore(0);
+    navigate('/');
   };
 
   const handleEndGame = () => {
@@ -108,6 +106,17 @@ const Index = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const getPlayerIcon = () => {
+    switch (playerSymbol) {
+      case 'triangle':
+        return <Triangle className="w-5 h-5 text-green-500" strokeWidth={3} />;
+      case 'square':
+        return <Square className="w-5 h-5 text-cyan-500" strokeWidth={3} />;
+      default:
+        return <Circle className="w-5 h-5 text-pink-500" strokeWidth={3} />;
+    }
+  };
+
   const progress = ((currentIndex + 1) / shuffledExamples.length) * 100;
 
   return (
@@ -120,7 +129,10 @@ const Index = () => {
       <div className="w-full max-w-md mb-8 space-y-4 z-10">
         <div className="text-center space-y-2">
           <div className="flex items-center justify-between">
-            <div className="w-10" /> {/* Spacer for centering */}
+            <div className="flex items-center gap-2 text-muted-foreground">
+              {getPlayerIcon()}
+              <span className="text-sm font-mono font-bold">#{playerNumber}</span>
+            </div>
             <h1 className="text-4xl font-bold text-foreground bg-clip-text">
               🔍 NPM Imposters
             </h1>
