@@ -3,7 +3,9 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle2, XCircle, RotateCcw, Trophy, Clock, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
 import { CodeExample } from '@/data/codeExamples';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Leaderboard } from './Leaderboard';
 
 interface ResultModalProps {
   score: number;
@@ -18,6 +20,31 @@ export const ResultModal = ({ score, total, finalScore, timeTaken, onRestart, sh
   const percentage = (score / total) * 100;
   const malwareExamples = shownExamples.filter(ex => ex.isMalware);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [currentPlayerId, setCurrentPlayerId] = useState<string | null>(null);
+  
+  // Save score to database when component mounts
+  useEffect(() => {
+    const saveScore = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setCurrentPlayerId(user.id);
+          await (supabase as any)
+            .from('profiles')
+            .update({
+              score: finalScore,
+              time_taken: timeTaken,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', user.id);
+        }
+      } catch (error) {
+        console.error('Error saving score:', error);
+      }
+    };
+    saveScore();
+  }, [finalScore, timeTaken]);
   
   const getMessage = () => {
     if (finalScore >= 900) return { text: '🎯 Perfect! Security Expert!', color: 'text-safe' };
@@ -238,16 +265,33 @@ export const ResultModal = ({ score, total, finalScore, timeTaken, onRestart, sh
               <p className="text-[10px] sm:text-xs">Score = Accuracy (60%) + Speed Bonus (40%)</p>
             </div>
 
-            <Button 
-              onClick={onRestart}
-              className="w-full bg-pink-600 hover:bg-pink-700 text-white"
-              size="lg"
-            >
-              <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-              Return to Lobby
-            </Button>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Button 
+                onClick={() => setShowLeaderboard(true)}
+                className="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white"
+                size="lg"
+              >
+                <Trophy className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                View Leaderboard
+              </Button>
+              <Button 
+                onClick={onRestart}
+                className="w-full bg-pink-600 hover:bg-pink-700 text-white"
+                size="lg"
+              >
+                <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                Return to Lobby
+              </Button>
+            </div>
           </div>
         </Card>
+
+        {/* Leaderboard Dialog */}
+        <Leaderboard 
+          open={showLeaderboard} 
+          onOpenChange={setShowLeaderboard}
+          currentPlayerId={currentPlayerId || undefined}
+        />
 
         {/* Malware Examples Review */}
         {malwareExamples.length > 0 && (
