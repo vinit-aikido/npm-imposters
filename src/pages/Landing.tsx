@@ -103,6 +103,18 @@ export const Landing = () => {
           </p>
         </div>
 
+        {/* View Leaderboard Button */}
+        <div className="animate-scale-in">
+          <Button 
+            onClick={() => navigate('/leaderboard')}
+            className="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-700 hover:to-yellow-600 text-white"
+            size="lg"
+          >
+            <Trophy className="w-5 h-5 mr-2" />
+            View Leaderboard
+          </Button>
+        </div>
+
         {/* Footer */}
         <div className="text-center space-y-2 pb-8">
           <p className="text-xs text-muted-foreground/60">
