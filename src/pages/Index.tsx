@@ -37,7 +37,7 @@ const Index = () => {
   const [lastGuess, setLastGuess] = useState<{ example: CodeExample; wasCorrect: boolean } | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [startTime] = useState<number>(Date.now());
-  const [elapsedTime, setElapsedTime] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(600); // 10 minutes in seconds
   const [finalScore, setFinalScore] = useState(0);
   const [showEndDialog, setShowEndDialog] = useState(false);
   const [playerNumber] = useState(() => localStorage.getItem('playerNumber') || '456');
@@ -53,16 +53,26 @@ const Index = () => {
     }
   }, []);
 
-  // Timer effect
+  // Timer effect - countdown from 10 minutes
   useEffect(() => {
     if (showResults || showFeedback) return;
     
     const interval = setInterval(() => {
-      setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const remaining = Math.max(0, 600 - elapsed);
+      setTimeRemaining(remaining);
+      
+      // Auto-end game when time runs out
+      if (remaining === 0) {
+        const timeTaken = 600; // Full 10 minutes
+        const calculatedScore = calculateScore(score, totalAnswered, timeTaken);
+        setFinalScore(calculatedScore);
+        setShowResults(true);
+      }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [startTime, showResults, showFeedback]);
+  }, [startTime, showResults, showFeedback, score, totalAnswered]);
 
   const handleSwipe = (direction: 'left' | 'right') => {
     if (!currentExample) return;
@@ -122,8 +132,8 @@ const Index = () => {
   };
 
   const handleEndGame = () => {
-    const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-    const calculatedScore = calculateScore(score, totalAnswered, timeTaken);
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const calculatedScore = calculateScore(score, totalAnswered, elapsed);
     setFinalScore(calculatedScore);
     setShowEndDialog(false);
     setShowResults(true);
@@ -201,9 +211,11 @@ const Index = () => {
             <span className="text-2xl">{score}</span>
             <span>Correct</span>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Clock className="w-4 h-4" />
-            <span className="text-xl font-mono">{formatTime(elapsedTime)}</span>
+          <div className="flex items-center gap-2">
+            <Clock className={`w-4 h-4 ${timeRemaining < 60 ? 'text-malware animate-pulse' : 'text-muted-foreground'}`} />
+            <span className={`text-xl font-mono ${timeRemaining < 60 ? 'text-malware font-bold' : 'text-muted-foreground'}`}>
+              {formatTime(timeRemaining)}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <span className="text-2xl">{totalAnswered - score}</span>
@@ -259,7 +271,7 @@ const Index = () => {
           score={score}
           total={totalAnswered}
           finalScore={finalScore}
-          timeTaken={elapsedTime}
+          timeTaken={600 - timeRemaining}
           onRestart={handleRestart}
           shownExamples={shownExamples}
         />
