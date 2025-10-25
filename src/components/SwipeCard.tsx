@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, AlertTriangle } from 'lucide-react';
+import { Shield, AlertTriangle, Download, Calendar, ExternalLink } from 'lucide-react';
 import { CodeExample } from '@/data/codeExamples';
 
 interface SwipeCardProps {
@@ -76,6 +76,29 @@ export const SwipeCard = ({ example, onSwipe, isTop }: SwipeCardProps) => {
               {example.severity}
             </Badge>
           )}
+        </div>
+
+        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+          <a 
+            href={example.npmUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 hover:text-foreground transition-colors"
+          >
+            <ExternalLink className="w-3 h-3" />
+            <span>npm page</span>
+          </a>
+          <div className="flex items-center gap-1">
+            <Download className="w-3 h-3" />
+            <span>{example.weeklyDownloads}/week</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Calendar className="w-3 h-3" />
+            <span>v{example.version}</span>
+          </div>
+          <div className="text-muted-foreground/70">
+            {example.lastPublished}
+          </div>
         </div>
 
         <div className="bg-background/50 rounded-md p-4 overflow-x-auto">
