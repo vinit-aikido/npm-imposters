@@ -5,7 +5,15 @@ import { FeedbackCard } from '@/components/FeedbackCard';
 import { ResultModal } from '@/components/ResultModal';
 import { codeExamples, CodeExample } from '@/data/codeExamples';
 import { Progress } from '@/components/ui/progress';
-import { Shield, AlertTriangle, Clock, X, Circle, Triangle, Square } from 'lucide-react';
+import { Shield, AlertTriangle, Clock, X, Circle, Triangle, Square, TrendingUp } from 'lucide-react';
+import { 
+  initializePerformance, 
+  updatePerformance, 
+  selectNextExample,
+  getDifficultyColor,
+  getDifficultyLabel,
+  type PerformanceTracker 
+} from '@/utils/adaptiveDifficulty';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,21 +27,29 @@ import {
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentExample, setCurrentExample] = useState<CodeExample | null>(null);
+  const [usedIds, setUsedIds] = useState<Set<number>>(new Set());
+  const [performance, setPerformance] = useState<PerformanceTracker>(initializePerformance());
   const [score, setScore] = useState(0);
+  const [totalAnswered, setTotalAnswered] = useState(0);
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastGuess, setLastGuess] = useState<{ example: CodeExample; wasCorrect: boolean } | null>(null);
   const [showResults, setShowResults] = useState(false);
-  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [startTime] = useState<number>(Date.now());
   const [elapsedTime, setElapsedTime] = useState(0);
   const [finalScore, setFinalScore] = useState(0);
   const [showEndDialog, setShowEndDialog] = useState(false);
   const [playerNumber] = useState(() => localStorage.getItem('playerNumber') || '456');
   const [playerSymbol] = useState(() => localStorage.getItem('playerSymbol') || 'circle');
 
-  const shuffledExamples = useState(() => 
-    [...codeExamples].sort(() => Math.random() - 0.5)
-  )[0];
+  // Initialize first example
+  useEffect(() => {
+    const firstExample = selectNextExample(codeExamples, usedIds, performance.currentDifficulty);
+    if (firstExample) {
+      setCurrentExample(firstExample);
+      setUsedIds(new Set([firstExample.id]));
+    }
+  }, []);
 
   // Timer effect
   useEffect(() => {
@@ -47,13 +63,19 @@ const Index = () => {
   }, [startTime, showResults, showFeedback]);
 
   const handleSwipe = (direction: 'left' | 'right') => {
-    const currentExample = shuffledExamples[currentIndex];
+    if (!currentExample) return;
+    
     const guessedMalware = direction === 'left';
     const wasCorrect = guessedMalware === currentExample.isMalware;
 
     if (wasCorrect) {
       setScore(score + 1);
     }
+    setTotalAnswered(totalAnswered + 1);
+
+    // Update performance tracker
+    const newPerformance = updatePerformance(performance, wasCorrect);
+    setPerformance(newPerformance);
 
     setLastGuess({ example: currentExample, wasCorrect });
     setShowFeedback(true);
@@ -63,12 +85,16 @@ const Index = () => {
     setShowFeedback(false);
     setLastGuess(null);
 
-    if (currentIndex < shuffledExamples.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+    // Select next example based on current difficulty
+    const nextExample = selectNextExample(codeExamples, usedIds, performance.currentDifficulty);
+    
+    if (nextExample) {
+      setCurrentExample(nextExample);
+      setUsedIds(new Set([...usedIds, nextExample.id]));
     } else {
-      // Calculate final score
+      // No more examples, end game
       const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-      const calculatedScore = calculateScore(score, shuffledExamples.length, timeTaken);
+      const calculatedScore = calculateScore(score, totalAnswered, timeTaken);
       setFinalScore(calculatedScore);
       setShowResults(true);
     }
@@ -94,7 +120,7 @@ const Index = () => {
 
   const handleEndGame = () => {
     const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-    const calculatedScore = calculateScore(score, currentIndex, timeTaken);
+    const calculatedScore = calculateScore(score, totalAnswered, timeTaken);
     setFinalScore(calculatedScore);
     setShowEndDialog(false);
     setShowResults(true);
@@ -117,7 +143,9 @@ const Index = () => {
     }
   };
 
-  const progress = ((currentIndex + 1) / shuffledExamples.length) * 100;
+  const progress = (totalAnswered / codeExamples.length) * 100;
+
+  if (!currentExample) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -153,9 +181,16 @@ const Index = () => {
         <div className="space-y-2">
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>Progress</span>
-            <span>{currentIndex + 1} / {shuffledExamples.length}</span>
+            <span>{totalAnswered} / {codeExamples.length}</span>
           </div>
           <Progress value={progress} className="h-2" />
+          <div className="flex items-center justify-center gap-2 text-sm">
+            <TrendingUp className="w-4 h-4" />
+            <span className="text-muted-foreground">Difficulty:</span>
+            <span className={`font-bold ${getDifficultyColor(performance.currentDifficulty)}`}>
+              {getDifficultyLabel(performance.currentDifficulty)}
+            </span>
+          </div>
         </div>
 
         <div className="flex justify-between text-sm">
@@ -168,7 +203,7 @@ const Index = () => {
             <span className="text-xl font-mono">{formatTime(elapsedTime)}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
-            <span className="text-2xl">{currentIndex - score}</span>
+            <span className="text-2xl">{totalAnswered - score}</span>
             <span>Wrong</span>
           </div>
         </div>
@@ -176,14 +211,12 @@ const Index = () => {
 
       {/* Card Stack */}
       <div className="relative w-full max-w-md h-[500px] mb-8">
-        {shuffledExamples.slice(currentIndex, currentIndex + 2).map((example, idx) => (
-          <SwipeCard
-            key={example.id}
-            example={example}
-            onSwipe={handleSwipe}
-            isTop={idx === 0}
-          />
-        ))}
+        <SwipeCard
+          key={currentExample.id}
+          example={currentExample}
+          onSwipe={handleSwipe}
+          isTop={true}
+        />
       </div>
 
       {/* Instructions */}
@@ -221,7 +254,7 @@ const Index = () => {
       {showResults && (
         <ResultModal
           score={score}
-          total={showResults && currentIndex === shuffledExamples.length ? shuffledExamples.length : currentIndex}
+          total={totalAnswered}
           finalScore={finalScore}
           timeTaken={elapsedTime}
           onRestart={handleRestart}
@@ -234,7 +267,7 @@ const Index = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>End Game Early?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to end the game now? Your score will be calculated based on your current progress ({score} correct out of {currentIndex} reviewed).
+              Are you sure you want to end the game now? Your score will be calculated based on your current progress ({score} correct out of {totalAnswered} reviewed).
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

