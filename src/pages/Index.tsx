@@ -43,6 +43,7 @@ const Index = () => {
   const [showEndDialog, setShowEndDialog] = useState(false);
   const [playerNumber] = useState(() => localStorage.getItem('playerNumber') || '456');
   const [playerSymbol] = useState(() => localStorage.getItem('playerSymbol') || 'circle');
+  const [jeopardyMode] = useState(() => localStorage.getItem('jeopardyMode') === 'true');
   const [showEliminationRound, setShowEliminationRound] = useState(false);
   const [eliminationExample, setEliminationExample] = useState<CodeExample | null>(null);
   const [eliminationRoundNumber, setEliminationRoundNumber] = useState(0);
@@ -101,8 +102,8 @@ const Index = () => {
     setShowFeedback(false);
     setLastGuess(null);
 
-    // Check if elimination round should trigger (every 5 questions)
-    if (totalAnswered > 0 && totalAnswered % 5 === 0) {
+    // Check if elimination round should trigger (every 5 questions) - only if jeopardy mode is enabled
+    if (jeopardyMode && totalAnswered > 0 && totalAnswered % 5 === 0) {
       // Select a hard example for elimination round
       const hardExamples = codeExamples.filter(ex => 
         ex.difficulty === 'hard' && !usedIds.has(ex.id)

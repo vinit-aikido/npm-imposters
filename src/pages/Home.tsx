@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Circle, Triangle, Square, Play } from 'lucide-react';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,6 +28,7 @@ export const Home = () => {
   const [email, setEmail] = useState<string>('');
   const [errors, setErrors] = useState<{ firstName?: string; email?: string }>({});
   const [loading, setLoading] = useState(false);
+  const [jeopardyMode, setJeopardyMode] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -101,6 +103,7 @@ export const Home = () => {
       localStorage.setItem('playerNumber', playerNumber);
       localStorage.setItem('playerFirstName', firstName);
       localStorage.setItem('playerEmail', email);
+      localStorage.setItem('jeopardyMode', jeopardyMode.toString());
       
       navigate('/game');
     } catch (error) {
@@ -248,6 +251,26 @@ export const Home = () => {
                 <li>• Score based on accuracy (60%) + speed (40%)</li>
                 <li>• Maximum score: 1000 points</li>
               </ul>
+            </div>
+
+            {/* Jeopardy Mode Toggle */}
+            <div className="p-4 bg-gradient-to-r from-malware/10 to-pink-950/20 rounded-lg border-2 border-malware/30">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <label htmlFor="jeopardy-mode" className="text-sm font-bold text-foreground cursor-pointer">
+                    Add Squid Games Jeopardy (Hard)
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    High-stakes elimination rounds every 5 questions
+                  </p>
+                </div>
+                <Switch
+                  id="jeopardy-mode"
+                  checked={jeopardyMode}
+                  onCheckedChange={setJeopardyMode}
+                  className="data-[state=checked]:bg-malware"
+                />
+              </div>
             </div>
 
             {/* Start Button */}
