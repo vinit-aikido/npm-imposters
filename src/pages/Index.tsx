@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { SwipeCard } from '@/components/SwipeCard';
 import { FeedbackCard } from '@/components/FeedbackCard';
 import { ResultModal } from '@/components/ResultModal';
+import { EliminationRound } from '@/components/EliminationRound';
 import { codeExamples, CodeExample } from '@/data/codeExamples';
 import { Progress } from '@/components/ui/progress';
 import { Shield, AlertTriangle, Clock, X, Circle, Triangle, Square, TrendingUp } from 'lucide-react';
@@ -42,6 +43,9 @@ const Index = () => {
   const [showEndDialog, setShowEndDialog] = useState(false);
   const [playerNumber] = useState(() => localStorage.getItem('playerNumber') || '456');
   const [playerSymbol] = useState(() => localStorage.getItem('playerSymbol') || 'circle');
+  const [showEliminationRound, setShowEliminationRound] = useState(false);
+  const [eliminationExample, setEliminationExample] = useState<CodeExample | null>(null);
+  const [eliminationRoundNumber, setEliminationRoundNumber] = useState(0);
 
   // Initialize first example
   useEffect(() => {
@@ -97,6 +101,24 @@ const Index = () => {
     setShowFeedback(false);
     setLastGuess(null);
 
+    // Check if elimination round should trigger (every 5 questions)
+    if (totalAnswered > 0 && totalAnswered % 5 === 0) {
+      // Select a hard example for elimination round
+      const hardExamples = codeExamples.filter(ex => 
+        ex.difficulty === 'hard' && !usedIds.has(ex.id)
+      );
+      const eliminationEx = hardExamples[Math.floor(Math.random() * hardExamples.length)] || 
+                            selectNextExample(codeExamples, usedIds, 'hard');
+      
+      if (eliminationEx) {
+        setEliminationExample(eliminationEx);
+        setUsedIds(new Set([...usedIds, eliminationEx.id]));
+        setEliminationRoundNumber(Math.floor(totalAnswered / 5));
+        setShowEliminationRound(true);
+        return;
+      }
+    }
+
     // Select next example based on current difficulty
     const nextExample = selectNextExample(codeExamples, usedIds, performance.currentDifficulty);
     
@@ -106,8 +128,8 @@ const Index = () => {
       setShownExamples([...shownExamples, nextExample]);
     } else {
       // No more examples, end game
-      const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-      const calculatedScore = calculateScore(score, totalAnswered, timeTaken);
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const calculatedScore = calculateScore(score, totalAnswered, elapsed);
       setFinalScore(calculatedScore);
       setShowResults(true);
     }
@@ -137,6 +159,44 @@ const Index = () => {
     setFinalScore(calculatedScore);
     setShowEndDialog(false);
     setShowResults(true);
+  };
+
+  const handleEliminationAnswer = (correct: boolean) => {
+    if (correct) {
+      // Bonus points for surviving elimination round
+      setScore(score + 3); // +150% bonus (1 correct + 2 bonus = 3 total)
+    } else {
+      // Penalty for wrong answer in elimination round
+      setScore(Math.max(0, score - 2)); // -2 points penalty
+    }
+    
+    // Count this as an answered question
+    setTotalAnswered(totalAnswered + 1);
+    
+    // Add to shown examples
+    if (eliminationExample) {
+      setShownExamples([...shownExamples, eliminationExample]);
+    }
+    
+    // Close elimination round and continue
+    setShowEliminationRound(false);
+    setEliminationExample(null);
+    
+    // Select next regular example
+    setTimeout(() => {
+      const nextExample = selectNextExample(codeExamples, usedIds, performance.currentDifficulty);
+      if (nextExample) {
+        setCurrentExample(nextExample);
+        setUsedIds(new Set([...usedIds, nextExample.id]));
+        setShownExamples(prev => [...prev, nextExample]);
+      } else {
+        // No more examples, end game
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const calculatedScore = calculateScore(score, totalAnswered + 1, elapsed);
+        setFinalScore(calculatedScore);
+        setShowResults(true);
+      }
+    }, 100);
   };
 
   const formatTime = (seconds: number) => {
@@ -262,6 +322,15 @@ const Index = () => {
           example={lastGuess.example}
           wasCorrect={lastGuess.wasCorrect}
           onComplete={handleFeedbackComplete}
+        />
+      )}
+
+      {/* Elimination Round */}
+      {showEliminationRound && eliminationExample && (
+        <EliminationRound
+          example={eliminationExample}
+          onAnswer={handleEliminationAnswer}
+          roundNumber={eliminationRoundNumber}
         />
       )}
 
