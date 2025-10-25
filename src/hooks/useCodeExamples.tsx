@@ -20,6 +20,7 @@ export const useCodeExamples = () => {
   return useQuery({
     queryKey: ['code-examples'],
     queryFn: async () => {
+      console.log('Fetching code examples from database...');
       const { data, error } = await supabase
         .from('code_examples')
         .select('*')
@@ -29,6 +30,8 @@ export const useCodeExamples = () => {
         console.error('Error fetching code examples:', error);
         throw error;
       }
+
+      console.log(`Successfully fetched ${data?.length || 0} code examples`);
 
       // Map database columns to camelCase for consistency
       return (data || []).map(row => ({
@@ -46,7 +49,7 @@ export const useCodeExamples = () => {
         difficulty: row.difficulty as 'easy' | 'medium' | 'hard',
       })) as CodeExample[];
     },
-    staleTime: 1000 * 60 * 60, // Cache for 1 hour
-    gcTime: 1000 * 60 * 60 * 24, // Keep in cache for 24 hours
+    staleTime: 0, // Don't cache - always fetch fresh data
+    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
   });
 };

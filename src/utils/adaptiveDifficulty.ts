@@ -63,25 +63,36 @@ export function selectNextExample(
   usedIds: Set<number>,
   currentDifficulty: Difficulty
 ): CodeExample | null {
+  console.log(`Selecting next example. Total examples: ${allExamples.length}, Used: ${usedIds.size}, Difficulty: ${currentDifficulty}`);
+  
   // Filter out already used examples and match current difficulty
   const availableExamples = allExamples.filter(
     (example) => !usedIds.has(example.id) && example.difficulty === currentDifficulty
   );
 
+  console.log(`Available at ${currentDifficulty} difficulty: ${availableExamples.length}`);
+
   // If no examples at current difficulty, try adjacent difficulties
   if (availableExamples.length === 0) {
     const fallbackExamples = allExamples.filter((example) => !usedIds.has(example.id));
     
+    console.log(`Fallback available: ${fallbackExamples.length}`);
+    
     if (fallbackExamples.length === 0) {
+      console.log('No more examples available - game should end');
       return null; // No more examples available
     }
 
     // Pick a random one from available
-    return fallbackExamples[Math.floor(Math.random() * fallbackExamples.length)];
+    const selected = fallbackExamples[Math.floor(Math.random() * fallbackExamples.length)];
+    console.log(`Selected fallback example ID: ${selected.id}`);
+    return selected;
   }
 
   // Return a random example from the available pool at current difficulty
-  return availableExamples[Math.floor(Math.random() * availableExamples.length)];
+  const selected = availableExamples[Math.floor(Math.random() * availableExamples.length)];
+  console.log(`Selected example ID: ${selected.id}`);
+  return selected;
 }
 
 export function getDifficultyColor(difficulty: Difficulty): string {
