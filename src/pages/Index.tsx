@@ -4,9 +4,9 @@ import { SwipeCard } from '@/components/SwipeCard';
 import { FeedbackCard } from '@/components/FeedbackCard';
 import { ResultModal } from '@/components/ResultModal';
 import { EliminationRound } from '@/components/EliminationRound';
-import { codeExamples, CodeExample } from '@/data/codeExamples';
+import { useCodeExamples, type CodeExample } from '@/hooks/useCodeExamples';
 import { Progress } from '@/components/ui/progress';
-import { Shield, AlertTriangle, Clock, X, Circle, Triangle, Square, TrendingUp } from 'lucide-react';
+import { Shield, AlertTriangle, Clock, X, Circle, Triangle, Square, TrendingUp, Loader2, AlertCircle } from 'lucide-react';
 import { 
   initializePerformance, 
   updatePerformance, 
@@ -28,6 +28,7 @@ import {
 import { Button } from '@/components/ui/button';
 
 const Index = () => {
+  const { data: codeExamples, isLoading, error } = useCodeExamples();
   const [currentExample, setCurrentExample] = useState<CodeExample | null>(null);
   const [usedIds, setUsedIds] = useState<Set<number>>(new Set());
   const [shownExamples, setShownExamples] = useState<CodeExample[]>([]);
@@ -50,13 +51,15 @@ const Index = () => {
 
   // Initialize first example
   useEffect(() => {
+    if (!codeExamples || codeExamples.length === 0) return;
+    
     const firstExample = selectNextExample(codeExamples, usedIds, performance.currentDifficulty);
     if (firstExample) {
       setCurrentExample(firstExample);
       setUsedIds(new Set([firstExample.id]));
       setShownExamples([firstExample]);
     }
-  }, []);
+  }, [codeExamples]);
 
   // Timer effect - countdown from 4:56
   useEffect(() => {
@@ -99,6 +102,8 @@ const Index = () => {
   };
 
   const handleFeedbackComplete = () => {
+    if (!codeExamples) return;
+    
     setShowFeedback(false);
     setLastGuess(null);
 
@@ -163,6 +168,8 @@ const Index = () => {
   };
 
   const handleEliminationAnswer = (correct: boolean) => {
+    if (!codeExamples) return;
+    
     if (correct) {
       // Bonus points for surviving elimination round
       setScore(score + 3); // +150% bonus (1 correct + 2 bonus = 3 total)
@@ -217,9 +224,54 @@ const Index = () => {
     }
   };
 
-  const progress = (totalAnswered / codeExamples.length) * 100;
+  const progress = codeExamples ? (totalAnswered / codeExamples.length) * 100 : 0;
 
-  if (!currentExample) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading code examples...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4 p-6">
+          <AlertCircle className="w-12 h-12 text-malware mx-auto" />
+          <h2 className="text-xl font-bold">Error Loading Examples</h2>
+          <p className="text-muted-foreground">
+            Failed to load code examples. Please try refreshing the page.
+          </p>
+          <Button onClick={() => navigate('/seed')}>
+            Seed Database
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!codeExamples || codeExamples.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4 p-6">
+          <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto" />
+          <h2 className="text-xl font-bold">No Examples Found</h2>
+          <p className="text-muted-foreground">
+            The database needs to be seeded with code examples.
+          </p>
+          <Button onClick={() => navigate('/seed')}>
+            Seed Database Now
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentExample) return null;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -255,7 +307,7 @@ const Index = () => {
         <div className="space-y-2">
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>Progress</span>
-            <span>{totalAnswered} / {codeExamples.length}</span>
+            <span>{totalAnswered} / {codeExamples?.length || 0}</span>
           </div>
           <Progress value={progress} className="h-2" />
           <div className="flex items-center justify-center gap-2 text-sm">
