@@ -14,7 +14,6 @@ const PLAYER_SYMBOLS = [
 
 const playerSchema = z.object({
   firstName: z.string().trim().max(50).optional(),
-  lastName: z.string().trim().max(50).optional(),
   email: z.string().trim().email().max(255).optional().or(z.literal('')),
 });
 
@@ -22,23 +21,21 @@ export const Home = () => {
   const [selectedSymbol, setSelectedSymbol] = useState<string>('circle');
   const [playerNumber, setPlayerNumber] = useState<string>('456');
   const [firstName, setFirstName] = useState<string>('');
-  const [lastName, setLastName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
-  const [errors, setErrors] = useState<{ firstName?: string; lastName?: string; email?: string }>({});
+  const [errors, setErrors] = useState<{ firstName?: string; email?: string }>({});
   const navigate = useNavigate();
 
   const handleStart = () => {
     // Validate optional fields if provided
     const validation = playerSchema.safeParse({
       firstName: firstName || undefined,
-      lastName: lastName || undefined,
       email: email || undefined,
     });
 
     if (!validation.success) {
-      const fieldErrors: { firstName?: string; lastName?: string; email?: string } = {};
+      const fieldErrors: { firstName?: string; email?: string } = {};
       validation.error.errors.forEach((err) => {
-        const field = err.path[0] as 'firstName' | 'lastName' | 'email';
+        const field = err.path[0] as 'firstName' | 'email';
         fieldErrors[field] = err.message;
       });
       setErrors(fieldErrors);
@@ -49,7 +46,6 @@ export const Home = () => {
     localStorage.setItem('playerSymbol', selectedSymbol);
     localStorage.setItem('playerNumber', playerNumber);
     localStorage.setItem('playerFirstName', firstName);
-    localStorage.setItem('playerLastName', lastName);
     localStorage.setItem('playerEmail', email);
     navigate('/game');
   };
@@ -84,39 +80,21 @@ export const Home = () => {
           <div className="space-y-6">
             {/* Player Details */}
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    First Name <span className="text-muted-foreground text-xs">(optional)</span>
-                  </label>
-                  <Input
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value.slice(0, 50))}
-                    maxLength={50}
-                    placeholder="Enter first name"
-                    className={`bg-background border-2 ${errors.firstName ? 'border-destructive' : 'border-border'}`}
-                  />
-                  {errors.firstName && (
-                    <p className="text-xs text-destructive">{errors.firstName}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    Last Name <span className="text-muted-foreground text-xs">(optional)</span>
-                  </label>
-                  <Input
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value.slice(0, 50))}
-                    maxLength={50}
-                    placeholder="Enter last name"
-                    className={`bg-background border-2 ${errors.lastName ? 'border-destructive' : 'border-border'}`}
-                  />
-                  {errors.lastName && (
-                    <p className="text-xs text-destructive">{errors.lastName}</p>
-                  )}
-                </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  First Name <span className="text-muted-foreground text-xs">(optional)</span>
+                </label>
+                <Input
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value.slice(0, 50))}
+                  maxLength={50}
+                  placeholder="Enter first name"
+                  className={`bg-background border-2 ${errors.firstName ? 'border-destructive' : 'border-border'}`}
+                />
+                {errors.firstName && (
+                  <p className="text-xs text-destructive">{errors.firstName}</p>
+                )}
               </div>
               
               <div className="space-y-2">
