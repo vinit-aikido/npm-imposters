@@ -286,5 +286,139 @@ function isEmail(str, options = {}) {
   return userRegex.test(user) && domainRegex.test(domain);
 }`,
     explanation: '✅ SAFE: Input validation library with pure functions. No external dependencies, no network calls, focused solely on string validation.'
+  },
+  {
+    id: 11,
+    packageName: 'moment',
+    isMalware: false,
+    npmUrl: 'https://www.npmjs.com/package/moment',
+    weeklyDownloads: '15,234,890',
+    lastPublished: '2022-07-06',
+    version: '2.29.4',
+    code: `// moment v2.29.4
+function createLocal(input, format, locale, strict) {
+  const config = createLocalOrUTC(input, format, locale, strict, false);
+  return createFromConfig(config);
+}
+
+function now() {
+  return Date.now ? Date.now() : +(new Date());
+}
+
+function duration(input, unit) {
+  const duration = new Duration(input, unit);
+  return duration;
+}`,
+    explanation: '✅ SAFE: Popular date/time manipulation library. Pure functions, no network access, well-maintained with millions of weekly downloads.'
+  },
+  {
+    id: 12,
+    packageName: 'chalk',
+    isMalware: false,
+    npmUrl: 'https://www.npmjs.com/package/chalk',
+    weeklyDownloads: '89,456,123',
+    lastPublished: '2021-05-10',
+    version: '4.1.2',
+    code: `// chalk v4.1.2
+const chalk = (text) => {
+  const styles = [];
+  
+  const builder = new Proxy({}, {
+    get(target, prop) {
+      if (prop === 'toString') {
+        return () => applyStyles(text, styles);
+      }
+      styles.push(prop);
+      return builder;
+    }
+  });
+  
+  return builder;
+};`,
+    explanation: '✅ SAFE: Terminal styling library. No network calls, no file system access, only adds ANSI codes for colored terminal output.'
+  },
+  {
+    id: 13,
+    packageName: 'uuid',
+    isMalware: false,
+    npmUrl: 'https://www.npmjs.com/package/uuid',
+    weeklyDownloads: '67,892,345',
+    lastPublished: '2023-11-14',
+    version: '9.0.1',
+    code: `// uuid v9.0.1
+function v4(options, buf, offset) {
+  const rnds = crypto.randomBytes(16);
+  
+  rnds[6] = (rnds[6] & 0x0f) | 0x40;
+  rnds[8] = (rnds[8] & 0x3f) | 0x80;
+  
+  return stringify(rnds);
+}
+
+function stringify(arr) {
+  const byteToHex = [];
+  for (let i = 0; i < 256; ++i) {
+    byteToHex.push((i + 0x100).toString(16).substr(1));
+  }
+  return byteToHex[arr[0]] + byteToHex[arr[1]] + '-' + byteToHex[arr[2]];
+}`,
+    explanation: '✅ SAFE: UUID generation library. Uses crypto APIs for randomness, no external connections, RFC-compliant UUID generation.'
+  },
+  {
+    id: 14,
+    packageName: 'dotenv',
+    isMalware: false,
+    npmUrl: 'https://www.npmjs.com/package/dotenv',
+    weeklyDownloads: '45,678,901',
+    lastPublished: '2023-08-22',
+    version: '16.3.1',
+    code: `// dotenv v16.3.1
+function config(options = {}) {
+  const dotenvPath = path.resolve(process.cwd(), '.env');
+  const encoding = options.encoding || 'utf8';
+  
+  try {
+    const parsed = parse(fs.readFileSync(dotenvPath, { encoding }));
+    
+    Object.keys(parsed).forEach(key => {
+      if (!Object.prototype.hasOwnProperty.call(process.env, key)) {
+        process.env[key] = parsed[key];
+      }
+    });
+    
+    return { parsed };
+  } catch (e) {
+    return { error: e };
+  }
+}`,
+    explanation: '✅ SAFE: Environment variable loader. Reads local .env files only, no network access, widely trusted for configuration management.'
+  },
+  {
+    id: 15,
+    packageName: 'commander',
+    isMalware: false,
+    npmUrl: 'https://www.npmjs.com/package/commander',
+    weeklyDownloads: '78,901,234',
+    lastPublished: '2023-12-05',
+    version: '11.1.0',
+    code: `// commander v11.1.0
+class Command {
+  constructor(name) {
+    this._name = name;
+    this.options = [];
+    this.commands = [];
+  }
+  
+  option(flags, description, defaultValue) {
+    this.options.push({ flags, description, defaultValue });
+    return this;
+  }
+  
+  parse(argv) {
+    const userArgs = argv.slice(2);
+    return this.parseOptions(userArgs);
+  }
+}`,
+    explanation: '✅ SAFE: CLI argument parsing library. Pure local processing, no network calls, maintained by Node.js community.'
   }
 ];
