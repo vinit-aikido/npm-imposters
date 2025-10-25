@@ -7,6 +7,7 @@ import { Circle, Triangle, Square, Play } from 'lucide-react';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import heroImage from '@/assets/hero-security-doll.png';
 
 const PLAYER_SYMBOLS = [
   { id: 'circle', icon: Circle, name: 'Circle', color: 'text-pink-500' },
@@ -116,6 +117,15 @@ export const Home = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-background via-pink-950/20 to-background">
+      {/* Hero Image */}
+      <div className="absolute inset-0 opacity-20 blur-sm">
+        <img 
+          src={heroImage} 
+          alt="Security Scanner Doll" 
+          className="w-full h-full object-cover"
+        />
+      </div>
+      
       {/* Squid Game style background elements */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-10 left-10 w-32 h-32 border-4 border-pink-500 rounded-full" />
