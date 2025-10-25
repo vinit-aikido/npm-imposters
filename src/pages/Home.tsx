@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Circle, Triangle, Square, Play } from 'lucide-react';
+import { Circle, Triangle, Square, Play, LogOut } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
+import type { User } from '@supabase/supabase-js';
 
 const PLAYER_SYMBOLS = [
   { id: 'circle', icon: Circle, name: 'Circle', color: 'text-pink-500' },
@@ -14,28 +17,69 @@ const PLAYER_SYMBOLS = [
 
 const playerSchema = z.object({
   firstName: z.string().trim().max(50).optional(),
-  email: z.string().trim().email().max(255).optional().or(z.literal('')),
 });
 
 export const Home = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedSymbol, setSelectedSymbol] = useState<string>('circle');
   const [playerNumber, setPlayerNumber] = useState<string>('456');
   const [firstName, setFirstName] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [errors, setErrors] = useState<{ firstName?: string; email?: string }>({});
+  const [errors, setErrors] = useState<{ firstName?: string }>({});
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleStart = () => {
+  useEffect(() => {
+    // Check authentication
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/auth');
+        return;
+      }
+      setUser(session.user);
+
+      // Load existing profile data
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile) {
+        setFirstName(profile.first_name || '');
+        setPlayerNumber(profile.player_number || '456');
+        setSelectedSymbol(profile.player_symbol || 'circle');
+      }
+
+      setLoading(false);
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session) {
+        navigate('/auth');
+      } else {
+        setUser(session.user);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const handleStart = async () => {
+    if (!user) return;
+
     // Validate optional fields if provided
     const validation = playerSchema.safeParse({
       firstName: firstName || undefined,
-      email: email || undefined,
     });
 
     if (!validation.success) {
-      const fieldErrors: { firstName?: string; email?: string } = {};
+      const fieldErrors: { firstName?: string } = {};
       validation.error.errors.forEach((err) => {
-        const field = err.path[0] as 'firstName' | 'email';
+        const field = err.path[0] as 'firstName';
         fieldErrors[field] = err.message;
       });
       setErrors(fieldErrors);
@@ -43,12 +87,46 @@ export const Home = () => {
     }
 
     setErrors({});
+
+    // Save to database
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        first_name: firstName,
+        player_number: playerNumber,
+        player_symbol: selectedSymbol,
+      })
+      .eq('id', user.id);
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save profile data',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Also save to localStorage for game access
     localStorage.setItem('playerSymbol', selectedSymbol);
     localStorage.setItem('playerNumber', playerNumber);
     localStorage.setItem('playerFirstName', firstName);
-    localStorage.setItem('playerEmail', email);
+    
     navigate('/game');
   };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-background via-pink-950/20 to-background">
@@ -64,9 +142,21 @@ export const Home = () => {
       <div className="w-full max-w-2xl space-y-8 z-10">
         {/* Title */}
         <div className="text-center space-y-4 animate-fade-in">
-          <h1 className="text-6xl font-bold text-foreground mb-2">
-            NPM Imposters
-          </h1>
+          <div className="flex items-center justify-between mb-2">
+            <div className="w-10" />
+            <h1 className="text-6xl font-bold text-foreground">
+              NPM Imposters
+            </h1>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="text-muted-foreground hover:text-foreground"
+              title="Logout"
+            >
+              <LogOut className="w-5 h-5" />
+            </Button>
+          </div>
           <p className="text-xl text-muted-foreground">
             Red Light, Green Light... Malware Detection
           </p>
@@ -94,23 +184,6 @@ export const Home = () => {
                 />
                 {errors.firstName && (
                   <p className="text-xs text-destructive">{errors.firstName}</p>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  Email Address <span className="text-muted-foreground text-xs">(optional)</span>
-                </label>
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value.slice(0, 255))}
-                  maxLength={255}
-                  placeholder="player@example.com"
-                  className={`bg-background border-2 ${errors.email ? 'border-destructive' : 'border-border'}`}
-                />
-                {errors.email && (
-                  <p className="text-xs text-destructive">{errors.email}</p>
                 )}
               </div>
             </div>
