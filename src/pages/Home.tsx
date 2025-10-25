@@ -1,11 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Circle, Triangle, Square, Play } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 
 const PLAYER_SYMBOLS = [
@@ -16,38 +14,28 @@ const PLAYER_SYMBOLS = [
 
 const playerSchema = z.object({
   firstName: z.string().trim().max(50).optional(),
+  email: z.string().trim().email().max(255).optional().or(z.literal('')),
 });
 
 export const Home = () => {
-  const [loading, setLoading] = useState(false);
   const [selectedSymbol, setSelectedSymbol] = useState<string>('circle');
   const [playerNumber, setPlayerNumber] = useState<string>('456');
   const [firstName, setFirstName] = useState<string>('');
-  const [errors, setErrors] = useState<{ firstName?: string }>({});
+  const [email, setEmail] = useState<string>('');
+  const [errors, setErrors] = useState<{ firstName?: string; email?: string }>({});
   const navigate = useNavigate();
-  const { toast } = useToast();
 
-  useEffect(() => {
-    // Initialize anonymous session if needed
-    const initSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        await supabase.auth.signInAnonymously();
-      }
-    };
-    initSession();
-  }, []);
-
-  const handleStart = async () => {
+  const handleStart = () => {
     // Validate optional fields if provided
     const validation = playerSchema.safeParse({
       firstName: firstName || undefined,
+      email: email || undefined,
     });
 
     if (!validation.success) {
-      const fieldErrors: { firstName?: string } = {};
+      const fieldErrors: { firstName?: string; email?: string } = {};
       validation.error.errors.forEach((err) => {
-        const field = err.path[0] as 'firstName';
+        const field = err.path[0] as 'firstName' | 'email';
         fieldErrors[field] = err.message;
       });
       setErrors(fieldErrors);
@@ -55,57 +43,11 @@ export const Home = () => {
     }
 
     setErrors({});
-    setLoading(true);
-
-    try {
-      // Ensure anonymous session exists
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        const { error: authError } = await supabase.auth.signInAnonymously();
-        if (authError) throw authError;
-      }
-
-      // Get the current session again after potential sign-in
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      
-      if (currentSession) {
-        // Save to database
-        const { error } = await supabase
-          .from('profiles')
-          .upsert({
-            id: currentSession.user.id,
-            first_name: firstName,
-            player_number: playerNumber,
-            player_symbol: selectedSymbol,
-          });
-
-        if (error) {
-          console.error('Database error:', error);
-          toast({
-            title: 'Error',
-            description: 'Failed to save profile data',
-            variant: 'destructive',
-          });
-          setLoading(false);
-          return;
-        }
-      }
-
-      // Also save to localStorage for game access
-      localStorage.setItem('playerSymbol', selectedSymbol);
-      localStorage.setItem('playerNumber', playerNumber);
-      localStorage.setItem('playerFirstName', firstName);
-      
-      navigate('/game');
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: 'Error',
-        description: 'Something went wrong',
-        variant: 'destructive',
-      });
-      setLoading(false);
-    }
+    localStorage.setItem('playerSymbol', selectedSymbol);
+    localStorage.setItem('playerNumber', playerNumber);
+    localStorage.setItem('playerFirstName', firstName);
+    localStorage.setItem('playerEmail', email);
+    navigate('/game');
   };
 
   return (
@@ -152,6 +94,23 @@ export const Home = () => {
                 />
                 {errors.firstName && (
                   <p className="text-xs text-destructive">{errors.firstName}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Email Address <span className="text-muted-foreground text-xs">(optional)</span>
+                </label>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value.slice(0, 255))}
+                  maxLength={255}
+                  placeholder="player@example.com"
+                  className={`bg-background border-2 ${errors.email ? 'border-destructive' : 'border-border'}`}
+                />
+                {errors.email && (
+                  <p className="text-xs text-destructive">{errors.email}</p>
                 )}
               </div>
             </div>
@@ -220,12 +179,11 @@ export const Home = () => {
             {/* Start Button */}
             <Button
               onClick={handleStart}
-              disabled={loading}
               size="lg"
               className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold text-lg py-6 transition-all hover:scale-105"
             >
               <Play className="w-6 h-6 mr-2" />
-              {loading ? 'Starting...' : 'Enter Game'}
+              Enter Game
             </Button>
           </div>
         </Card>
