@@ -17,7 +17,7 @@ const PLAYER_SYMBOLS = [
 ];
 
 const playerSchema = z.object({
-  firstName: z.string().trim().max(50).optional(),
+  firstName: z.string().trim().min(1, "First name is required").max(50, "First name must be less than 50 characters"),
   email: z.string().trim().email().max(255).optional().or(z.literal('')),
 });
 
@@ -45,9 +45,9 @@ export const Home = () => {
 
   const handleStart = async () => {
     setLoading(true);
-    // Validate optional fields if provided
+    // Validate fields
     const validation = playerSchema.safeParse({
-      firstName: firstName || undefined,
+      firstName: firstName,
       email: email || undefined,
     });
 
@@ -159,7 +159,7 @@ export const Home = () => {
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">
-                  First Name <span className="text-muted-foreground text-xs">(optional)</span>
+                  First Name <span className="text-destructive">*</span>
                 </label>
                 <Input
                   type="text"
