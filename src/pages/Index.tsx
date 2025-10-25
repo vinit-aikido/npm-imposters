@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SwipeCard } from '@/components/SwipeCard';
 import { FeedbackCard } from '@/components/FeedbackCard';
 import { ResultModal } from '@/components/ResultModal';
 import { codeExamples, CodeExample } from '@/data/codeExamples';
 import { Progress } from '@/components/ui/progress';
-import { Shield, AlertTriangle } from 'lucide-react';
+import { Shield, AlertTriangle, Clock } from 'lucide-react';
 
 const Index = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -12,10 +12,24 @@ const Index = () => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastGuess, setLastGuess] = useState<{ example: CodeExample; wasCorrect: boolean } | null>(null);
   const [showResults, setShowResults] = useState(false);
+  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [finalScore, setFinalScore] = useState(0);
 
   const shuffledExamples = useState(() => 
     [...codeExamples].sort(() => Math.random() - 0.5)
   )[0];
+
+  // Timer effect
+  useEffect(() => {
+    if (showResults || showFeedback) return;
+    
+    const interval = setInterval(() => {
+      setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [startTime, showResults, showFeedback]);
 
   const handleSwipe = (direction: 'left' | 'right') => {
     const currentExample = shuffledExamples[currentIndex];
@@ -37,8 +51,24 @@ const Index = () => {
     if (currentIndex < shuffledExamples.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
+      // Calculate final score
+      const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+      const calculatedScore = calculateScore(score, shuffledExamples.length, timeTaken);
+      setFinalScore(calculatedScore);
       setShowResults(true);
     }
+  };
+
+  const calculateScore = (correctAnswers: number, totalQuestions: number, timeInSeconds: number) => {
+    // Accuracy score: 60% weight (max 600 points)
+    const accuracyScore = (correctAnswers / totalQuestions) * 600;
+    
+    // Speed bonus: 40% weight (max 400 points)
+    // Optimal time: 3 seconds per question
+    const optimalTime = totalQuestions * 3;
+    const speedBonus = Math.max(0, 400 * (1 - (timeInSeconds - optimalTime) / (optimalTime * 3)));
+    
+    return Math.round(Math.min(1000, accuracyScore + speedBonus));
   };
 
   const handleRestart = () => {
@@ -47,6 +77,15 @@ const Index = () => {
     setShowResults(false);
     setShowFeedback(false);
     setLastGuess(null);
+    setStartTime(Date.now());
+    setElapsedTime(0);
+    setFinalScore(0);
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const progress = ((currentIndex + 1) / shuffledExamples.length) * 100;
@@ -80,6 +119,10 @@ const Index = () => {
           <div className="flex items-center gap-2 text-muted-foreground">
             <span className="text-2xl">{score}</span>
             <span>Correct</span>
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Clock className="w-4 h-4" />
+            <span className="text-xl font-mono">{formatTime(elapsedTime)}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <span className="text-2xl">{currentIndex - score}</span>
@@ -136,6 +179,8 @@ const Index = () => {
         <ResultModal
           score={score}
           total={shuffledExamples.length}
+          finalScore={finalScore}
+          timeTaken={elapsedTime}
           onRestart={handleRestart}
         />
       )}
