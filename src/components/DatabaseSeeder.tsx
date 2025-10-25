@@ -17,19 +17,6 @@ export const DatabaseSeeder = () => {
     setMessage('');
 
     try {
-      // Check if database already has data
-      const { count } = await supabase
-        .from('code_examples')
-        .select('*', { count: 'exact', head: true });
-
-      if (count && count > 0) {
-        setStatus('error');
-        setMessage(`Database already contains ${count} examples. Clear the table first if you want to re-seed.`);
-        toast.error('Database already seeded');
-        setIsSeeding(false);
-        return;
-      }
-
       // Convert camelCase to snake_case for database
       const dbRecords = codeExamples.map(example => ({
         id: example.id,
@@ -46,19 +33,19 @@ export const DatabaseSeeder = () => {
         difficulty: example.difficulty,
       }));
 
-      // Insert in batches of 20 to avoid timeouts
+      // Upsert in batches of 20 to avoid timeouts
       const batchSize = 20;
       for (let i = 0; i < dbRecords.length; i += batchSize) {
         const batch = dbRecords.slice(i, i + batchSize);
         const { error } = await supabase
           .from('code_examples')
-          .insert(batch);
+          .upsert(batch, { onConflict: 'id' });
 
         if (error) {
           throw error;
         }
 
-        setMessage(`Seeding... ${Math.min(i + batchSize, dbRecords.length)}/${dbRecords.length}`);
+        setMessage(`Syncing... ${Math.min(i + batchSize, dbRecords.length)}/${dbRecords.length}`);
       }
 
       setStatus('success');
