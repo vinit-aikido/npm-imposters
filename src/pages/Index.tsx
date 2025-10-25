@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/button';
 const Index = () => {
   const [currentExample, setCurrentExample] = useState<CodeExample | null>(null);
   const [usedIds, setUsedIds] = useState<Set<number>>(new Set());
+  const [shownExamples, setShownExamples] = useState<CodeExample[]>([]);
   const [performance, setPerformance] = useState<PerformanceTracker>(initializePerformance());
   const [score, setScore] = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
@@ -48,6 +49,7 @@ const Index = () => {
     if (firstExample) {
       setCurrentExample(firstExample);
       setUsedIds(new Set([firstExample.id]));
+      setShownExamples([firstExample]);
     }
   }, []);
 
@@ -91,6 +93,7 @@ const Index = () => {
     if (nextExample) {
       setCurrentExample(nextExample);
       setUsedIds(new Set([...usedIds, nextExample.id]));
+      setShownExamples([...shownExamples, nextExample]);
     } else {
       // No more examples, end game
       const timeTaken = Math.floor((Date.now() - startTime) / 1000);
@@ -258,6 +261,7 @@ const Index = () => {
           finalScore={finalScore}
           timeTaken={elapsedTime}
           onRestart={handleRestart}
+          shownExamples={shownExamples}
         />
       )}
 
