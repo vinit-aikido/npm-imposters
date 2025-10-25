@@ -27,7 +27,7 @@ export const Landing = () => {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4 space-y-12">
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-6 sm:p-4 space-y-12">
         {/* Logo/Title Section */}
         <div className="text-center space-y-6 animate-fade-in">
           <div className="inline-block">
