@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      code_examples: {
+        Row: {
+          code: string
+          created_at: string | null
+          cve_id: string | null
+          difficulty: string
+          explanation: string
+          id: number
+          is_malware: boolean
+          last_published: string
+          npm_url: string
+          package_name: string
+          severity: string | null
+          updated_at: string | null
+          version: string
+          weekly_downloads: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          cve_id?: string | null
+          difficulty: string
+          explanation: string
+          id: number
+          is_malware: boolean
+          last_published: string
+          npm_url: string
+          package_name: string
+          severity?: string | null
+          updated_at?: string | null
+          version: string
+          weekly_downloads: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          cve_id?: string | null
+          difficulty?: string
+          explanation?: string
+          id?: number
+          is_malware?: boolean
+          last_published?: string
+          npm_url?: string
+          package_name?: string
+          severity?: string | null
+          updated_at?: string | null
+          version?: string
+          weekly_downloads?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
