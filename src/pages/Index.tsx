@@ -151,7 +151,7 @@ const Index = () => {
   const navigate = useNavigate();
 
   const handleRestart = () => {
-    navigate('/setup');
+    navigate('/');
   };
 
   const handleEndGame = () => {
