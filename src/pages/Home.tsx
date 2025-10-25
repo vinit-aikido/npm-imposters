@@ -4,10 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Circle, Triangle, Square, Play, LogOut } from 'lucide-react';
+import { Circle, Triangle, Square, Play } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
-import type { User } from '@supabase/supabase-js';
 
 const PLAYER_SYMBOLS = [
   { id: 'circle', icon: Circle, name: 'Circle', color: 'text-pink-500' },
@@ -20,8 +19,7 @@ const playerSchema = z.object({
 });
 
 export const Home = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [selectedSymbol, setSelectedSymbol] = useState<string>('circle');
   const [playerNumber, setPlayerNumber] = useState<string>('456');
   const [firstName, setFirstName] = useState<string>('');
@@ -30,47 +28,17 @@ export const Home = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check authentication
-    const checkAuth = async () => {
+    // Initialize anonymous session if needed
+    const initSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        navigate('/auth');
-        return;
+        await supabase.auth.signInAnonymously();
       }
-      setUser(session.user);
-
-      // Load existing profile data
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
-
-      if (profile) {
-        setFirstName(profile.first_name || '');
-        setPlayerNumber(profile.player_number || '456');
-        setSelectedSymbol(profile.player_symbol || 'circle');
-      }
-
-      setLoading(false);
     };
-
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session) {
-        navigate('/auth');
-      } else {
-        setUser(session.user);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    initSession();
+  }, []);
 
   const handleStart = async () => {
-    if (!user) return;
-
     // Validate optional fields if provided
     const validation = playerSchema.safeParse({
       firstName: firstName || undefined,
@@ -87,46 +55,58 @@ export const Home = () => {
     }
 
     setErrors({});
+    setLoading(true);
 
-    // Save to database
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        first_name: firstName,
-        player_number: playerNumber,
-        player_symbol: selectedSymbol,
-      })
-      .eq('id', user.id);
+    try {
+      // Ensure anonymous session exists
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        const { error: authError } = await supabase.auth.signInAnonymously();
+        if (authError) throw authError;
+      }
 
-    if (error) {
+      // Get the current session again after potential sign-in
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      
+      if (currentSession) {
+        // Save to database
+        const { error } = await supabase
+          .from('profiles')
+          .upsert({
+            id: currentSession.user.id,
+            first_name: firstName,
+            player_number: playerNumber,
+            player_symbol: selectedSymbol,
+          });
+
+        if (error) {
+          console.error('Database error:', error);
+          toast({
+            title: 'Error',
+            description: 'Failed to save profile data',
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Also save to localStorage for game access
+      localStorage.setItem('playerSymbol', selectedSymbol);
+      localStorage.setItem('playerNumber', playerNumber);
+      localStorage.setItem('playerFirstName', firstName);
+      
+      navigate('/game');
+    } catch (error) {
+      console.error('Error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to save profile data',
+        description: 'Something went wrong',
         variant: 'destructive',
       });
-      return;
+      setLoading(false);
     }
-
-    // Also save to localStorage for game access
-    localStorage.setItem('playerSymbol', selectedSymbol);
-    localStorage.setItem('playerNumber', playerNumber);
-    localStorage.setItem('playerFirstName', firstName);
-    
-    navigate('/game');
   };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/auth');
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-background via-pink-950/20 to-background">
@@ -142,21 +122,9 @@ export const Home = () => {
       <div className="w-full max-w-2xl space-y-8 z-10">
         {/* Title */}
         <div className="text-center space-y-4 animate-fade-in">
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-10" />
-            <h1 className="text-6xl font-bold text-foreground">
-              NPM Imposters
-            </h1>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleLogout}
-              className="text-muted-foreground hover:text-foreground"
-              title="Logout"
-            >
-              <LogOut className="w-5 h-5" />
-            </Button>
-          </div>
+          <h1 className="text-6xl font-bold text-foreground mb-2">
+            NPM Imposters
+          </h1>
           <p className="text-xl text-muted-foreground">
             Red Light, Green Light... Malware Detection
           </p>
@@ -252,11 +220,12 @@ export const Home = () => {
             {/* Start Button */}
             <Button
               onClick={handleStart}
+              disabled={loading}
               size="lg"
               className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold text-lg py-6 transition-all hover:scale-105"
             >
               <Play className="w-6 h-6 mr-2" />
-              Enter Game
+              {loading ? 'Starting...' : 'Enter Game'}
             </Button>
           </div>
         </Card>
