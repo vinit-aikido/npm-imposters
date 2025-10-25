@@ -61,7 +61,7 @@ const Index = () => {
       <div className="w-full max-w-md mb-8 space-y-4 z-10">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-foreground bg-clip-text">
-            🔍 Malware Hunter
+            🔍 NPM Imposters
           </h1>
           <p className="text-muted-foreground">
             Swipe to detect malicious code
