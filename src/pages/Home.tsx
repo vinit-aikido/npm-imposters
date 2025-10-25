@@ -152,9 +152,14 @@ export const Home = () => {
 
         {/* Title */}
         <div className="text-center space-y-4 animate-fade-in">
-          <h1 className="text-6xl font-bold text-foreground mb-2">
-            NPM Imposters
-          </h1>
+          <div className="inline-block">
+            <h1 className="md:text-8xl font-bold text-foreground mb-4 tracking-tight text-6xl">
+              NPM
+            </h1>
+            <h1 className="md:text-8xl font-bold bg-gradient-to-r from-pink-500 via-malware to-pink-600 bg-clip-text text-transparent mb-4 text-5xl">
+              IMPOSTERS
+            </h1>
+          </div>
           <p className="text-xl text-muted-foreground">
             Red Light, Green Light... Malware Detection
           </p>
