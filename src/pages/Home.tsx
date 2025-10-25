@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Circle, Triangle, Square, Play } from 'lucide-react';
 import { z } from 'zod';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const PLAYER_SYMBOLS = [
   { id: 'circle', icon: Circle, name: 'Circle', color: 'text-pink-500' },
@@ -23,9 +25,23 @@ export const Home = () => {
   const [firstName, setFirstName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [errors, setErrors] = useState<{ firstName?: string; email?: string }>({});
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleStart = () => {
+  // Ensure anonymous user is signed in
+  useEffect(() => {
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        await supabase.auth.signInAnonymously();
+      }
+    };
+    initAuth();
+  }, []);
+
+  const handleStart = async () => {
+    setLoading(true);
     // Validate optional fields if provided
     const validation = playerSchema.safeParse({
       firstName: firstName || undefined,
@@ -39,15 +55,63 @@ export const Home = () => {
         fieldErrors[field] = err.message;
       });
       setErrors(fieldErrors);
+      setLoading(false);
       return;
     }
 
     setErrors({});
-    localStorage.setItem('playerSymbol', selectedSymbol);
-    localStorage.setItem('playerNumber', playerNumber);
-    localStorage.setItem('playerFirstName', firstName);
-    localStorage.setItem('playerEmail', email);
-    navigate('/game');
+
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "Please refresh the page and try again.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Save to database
+      const { error } = await (supabase as any)
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          first_name: firstName || null,
+          email: email || null,
+          player_number: playerNumber,
+          player_symbol: selectedSymbol,
+        });
+
+      if (error) {
+        console.error('Database error:', error);
+        toast({
+          title: "Error saving data",
+          description: "Your data couldn't be saved, but you can still play.",
+          variant: "destructive",
+        });
+      }
+
+      // Also save to localStorage for game access
+      localStorage.setItem('playerSymbol', selectedSymbol);
+      localStorage.setItem('playerNumber', playerNumber);
+      localStorage.setItem('playerFirstName', firstName);
+      localStorage.setItem('playerEmail', email);
+      
+      navigate('/game');
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -179,11 +243,12 @@ export const Home = () => {
             {/* Start Button */}
             <Button
               onClick={handleStart}
+              disabled={loading}
               size="lg"
-              className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold text-lg py-6 transition-all hover:scale-105"
+              className="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold text-lg py-6 transition-all hover:scale-105 disabled:opacity-50"
             >
               <Play className="w-6 h-6 mr-2" />
-              Enter Game
+              {loading ? 'Saving...' : 'Enter Game'}
             </Button>
           </div>
         </Card>
