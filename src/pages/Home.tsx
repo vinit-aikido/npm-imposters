@@ -9,11 +9,14 @@ import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import heroImage from '@/assets/hero-security-doll.png';
+import playerCircle from '@/assets/player-circle.png';
+import playerTriangle from '@/assets/player-triangle.png';
+import playerSquare from '@/assets/player-square.png';
 
 const PLAYER_SYMBOLS = [
-  { id: 'circle', icon: Circle, name: 'Circle', color: 'text-pink-500' },
-  { id: 'triangle', icon: Triangle, name: 'Triangle', color: 'text-green-500' },
-  { id: 'square', icon: Square, name: 'Square', color: 'text-cyan-500' },
+  { id: 'circle', icon: Circle, name: 'Circle Player', color: 'text-pink-500', avatar: playerCircle },
+  { id: 'triangle', icon: Triangle, name: 'Triangle Player', color: 'text-green-500', avatar: playerTriangle },
+  { id: 'square', icon: Square, name: 'Square Player', color: 'text-cyan-500', avatar: playerSquare },
 ];
 
 const playerSchema = z.object({
@@ -210,28 +213,28 @@ export const Home = () => {
             {/* Symbol Selection */}
             <div className="space-y-3">
               <label className="text-sm font-medium text-foreground">
-                Choose Your Symbol
+                Choose your player
               </label>
               <div className="grid grid-cols-3 gap-4">
                 {PLAYER_SYMBOLS.map((symbol) => {
-                  const Icon = symbol.icon;
                   return (
                     <button
                       key={symbol.id}
                       onClick={() => setSelectedSymbol(symbol.id)}
-                      className={`p-6 rounded-lg border-2 transition-all hover:scale-105 ${
+                      className={`relative p-4 rounded-lg border-2 transition-all hover:scale-105 ${
                         selectedSymbol === symbol.id
                           ? 'border-pink-500 bg-pink-500/20 shadow-lg shadow-pink-500/50'
                           : 'border-border bg-background/50 hover:border-border/80'
                       }`}
                     >
-                      <Icon 
-                        className={`w-12 h-12 mx-auto mb-2 ${
-                          selectedSymbol === symbol.id ? 'text-pink-500' : symbol.color
-                        }`}
-                        strokeWidth={3}
-                      />
-                      <p className={`text-sm font-medium ${
+                      <div className="relative aspect-square mb-2 rounded-lg overflow-hidden">
+                        <img 
+                          src={symbol.avatar} 
+                          alt={symbol.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <p className={`text-xs font-medium text-center ${
                         selectedSymbol === symbol.id ? 'text-pink-500' : 'text-muted-foreground'
                       }`}>
                         {symbol.name}
