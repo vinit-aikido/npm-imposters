@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Circle, Triangle, Square, Play } from 'lucide-react';
+import logo from '@/assets/npm-imposters-logo.png';
 
 const PLAYER_SYMBOLS = [
   { id: 'circle', icon: Circle, name: 'Circle', color: 'text-pink-500' },
@@ -35,9 +36,12 @@ export const Home = () => {
       <div className="w-full max-w-2xl space-y-8 z-10">
         {/* Title */}
         <div className="text-center space-y-4 animate-fade-in">
-          <h1 className="text-6xl font-bold text-foreground mb-2">
-            🔍 NPM Imposters
-          </h1>
+          <img 
+            src={logo} 
+            alt="NPM Imposters Logo" 
+            className="w-full max-w-md mx-auto mb-4"
+            style={{ mixBlendMode: 'screen' }}
+          />
           <p className="text-xl text-muted-foreground">
             Red Light, Green Light... Malware Detection
           </p>

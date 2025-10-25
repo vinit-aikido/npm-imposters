@@ -6,6 +6,7 @@ import { ResultModal } from '@/components/ResultModal';
 import { codeExamples, CodeExample } from '@/data/codeExamples';
 import { Progress } from '@/components/ui/progress';
 import { Shield, AlertTriangle, Clock, X, Circle, Triangle, Square } from 'lucide-react';
+import logo from '@/assets/npm-imposters-logo.png';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -133,9 +134,12 @@ const Index = () => {
               {getPlayerIcon()}
               <span className="text-sm font-mono font-bold">#{playerNumber}</span>
             </div>
-            <h1 className="text-4xl font-bold text-foreground bg-clip-text">
-              🔍 NPM Imposters
-            </h1>
+            <img 
+              src={logo} 
+              alt="NPM Imposters" 
+              className="h-12 w-auto"
+              style={{ mixBlendMode: 'screen' }}
+            />
             <Button
               variant="ghost"
               size="icon"
