@@ -38,7 +38,7 @@ const Index = () => {
   const [lastGuess, setLastGuess] = useState<{ example: CodeExample; wasCorrect: boolean } | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [startTime] = useState<number>(Date.now());
-  const [timeRemaining, setTimeRemaining] = useState(600); // 10 minutes in seconds
+  const [timeRemaining, setTimeRemaining] = useState(296); // 4 minutes 56 seconds (player 456!)
   const [finalScore, setFinalScore] = useState(0);
   const [showEndDialog, setShowEndDialog] = useState(false);
   const [playerNumber] = useState(() => localStorage.getItem('playerNumber') || '456');
@@ -58,18 +58,18 @@ const Index = () => {
     }
   }, []);
 
-  // Timer effect - countdown from 10 minutes
+  // Timer effect - countdown from 4:56
   useEffect(() => {
     if (showResults || showFeedback) return;
     
     const interval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      const remaining = Math.max(0, 600 - elapsed);
+      const remaining = Math.max(0, 296 - elapsed);
       setTimeRemaining(remaining);
       
       // Auto-end game when time runs out
       if (remaining === 0) {
-        const timeTaken = 600; // Full 10 minutes
+        const timeTaken = 296; // Full 4:56
         const calculatedScore = calculateScore(score, totalAnswered, timeTaken);
         setFinalScore(calculatedScore);
         setShowResults(true);
@@ -341,7 +341,7 @@ const Index = () => {
           score={score}
           total={totalAnswered}
           finalScore={finalScore}
-          timeTaken={600 - timeRemaining}
+          timeTaken={296 - timeRemaining}
           onRestart={handleRestart}
           shownExamples={shownExamples}
         />

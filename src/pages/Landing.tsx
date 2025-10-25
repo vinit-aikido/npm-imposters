@@ -76,7 +76,7 @@ export const Landing = () => {
         {/* Game Stats */}
         <div className="flex flex-wrap justify-center gap-8 text-center max-w-3xl">
           <div className="space-y-2">
-            <div className="text-4xl font-bold text-pink-500">10:00</div>
+            <div className="text-4xl font-bold text-pink-500">4:56</div>
             <div className="text-sm text-muted-foreground flex items-center gap-2">
               <Clock className="w-4 h-4" />
               Time Limit
