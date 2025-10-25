@@ -137,15 +137,15 @@ const Index = () => {
   };
 
   const calculateScore = (correctAnswers: number, totalQuestions: number, timeInSeconds: number) => {
-    // Accuracy score: 60% weight (max 600 points)
-    const accuracyScore = (correctAnswers / totalQuestions) * 600;
+    // Accuracy score: 60% weight (max 273.6 points, rounded to 274)
+    const accuracyScore = (correctAnswers / totalQuestions) * 274;
     
-    // Speed bonus: 40% weight (max 400 points)
+    // Speed bonus: 40% weight (max 182.4 points, rounded to 182)
     // Optimal time: 3 seconds per question
     const optimalTime = totalQuestions * 3;
-    const speedBonus = Math.max(0, 400 * (1 - (timeInSeconds - optimalTime) / (optimalTime * 3)));
+    const speedBonus = Math.max(0, 182 * (1 - (timeInSeconds - optimalTime) / (optimalTime * 3)));
     
-    return Math.round(Math.min(1000, accuracyScore + speedBonus));
+    return Math.round(Math.min(456, accuracyScore + speedBonus));
   };
 
   const navigate = useNavigate();

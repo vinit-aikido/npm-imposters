@@ -47,10 +47,10 @@ export const ResultModal = ({ score, total, finalScore, timeTaken, onRestart, sh
   }, [finalScore, timeTaken]);
   
   const getMessage = () => {
-    if (finalScore >= 900) return { text: '🎯 Perfect! Security Expert!', color: 'text-safe' };
-    if (finalScore >= 750) return { text: '🛡️ Great Job! Security Pro!', color: 'text-safe' };
-    if (finalScore >= 600) return { text: '👍 Good Work! Keep Learning!', color: 'text-primary' };
-    if (finalScore >= 400) return { text: '📚 Keep Practicing!', color: 'text-yellow-500' };
+    if (finalScore >= 410) return { text: '🎯 Perfect! Security Expert!', color: 'text-safe' };
+    if (finalScore >= 342) return { text: '🛡️ Great Job! Security Pro!', color: 'text-safe' };
+    if (finalScore >= 274) return { text: '👍 Good Work! Keep Learning!', color: 'text-primary' };
+    if (finalScore >= 182) return { text: '📚 Keep Practicing!', color: 'text-yellow-500' };
     return { text: '⚠️ Review Security Basics', color: 'text-malware' };
   };
 
@@ -232,7 +232,7 @@ export const ResultModal = ({ score, total, finalScore, timeTaken, onRestart, sh
                 <div className="text-4xl sm:text-6xl font-bold text-foreground">
                   {finalScore}
                 </div>
-                <p className="text-xs sm:text-sm text-muted-foreground">out of 1000 points</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">out of 456 points</p>
               </div>
             </div>
 

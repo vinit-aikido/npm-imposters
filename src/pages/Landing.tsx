@@ -83,7 +83,7 @@ export const Landing = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <div className="text-4xl font-bold text-green-500">1000</div>
+            <div className="text-4xl font-bold text-green-500">456</div>
             <div className="text-sm text-muted-foreground flex items-center gap-2">
               <Trophy className="w-4 h-4" />
               Max Score
