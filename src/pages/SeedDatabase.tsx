@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
-export const SeedDatabase = () => {
+const SeedDatabase = () => {
   const navigate = useNavigate();
 
   return (
@@ -32,3 +32,5 @@ export const SeedDatabase = () => {
     </div>
   );
 };
+
+export default SeedDatabase;

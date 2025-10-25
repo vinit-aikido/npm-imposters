@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Index from "./pages/Index";
-import { SeedDatabase } from "./pages/SeedDatabase";
+import SeedDatabase from "./pages/SeedDatabase";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
