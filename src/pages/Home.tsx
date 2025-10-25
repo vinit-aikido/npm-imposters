@@ -69,7 +69,7 @@ export const Home = () => {
         {/* Title */}
         <div className="text-center space-y-4 animate-fade-in">
           <h1 className="text-6xl font-bold text-foreground mb-2">
-            🔍 NPM Imposters
+            NPM Imposters
           </h1>
           <p className="text-xl text-muted-foreground">
             Red Light, Green Light... Malware Detection
