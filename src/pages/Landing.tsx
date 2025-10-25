@@ -84,7 +84,7 @@ export const Landing = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <div className="text-4xl font-bold text-cyan-500">20+</div>
+            <div className="text-4xl font-bold text-cyan-500">96</div>
             <div className="text-sm text-muted-foreground flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" />
               Real Threats
