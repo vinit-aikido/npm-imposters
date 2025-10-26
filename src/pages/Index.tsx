@@ -320,13 +320,17 @@ const Index = () => {
         </div>
 
         {/* Live Score Tracker */}
-        <div className="text-center mb-4">
-          <div className="inline-flex items-baseline gap-2 px-4 py-2 rounded-lg bg-primary/10 border border-primary/20">
-            <span className="text-4xl font-bold text-primary">
-              {totalAnswered > 0 ? calculateScore(score, totalAnswered, 296 - timeRemaining) : 0}
+        <div className="space-y-2 mb-4">
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>Score</span>
+            <span className="font-bold text-primary">
+              {totalAnswered > 0 ? calculateScore(score, totalAnswered, 296 - timeRemaining) : 0} / 456
             </span>
-            <span className="text-xl text-muted-foreground font-medium">/ 456</span>
           </div>
+          <Progress 
+            value={totalAnswered > 0 ? (calculateScore(score, totalAnswered, 296 - timeRemaining) / 456) * 100 : 0} 
+            className="h-3" 
+          />
         </div>
 
         <div className="flex justify-between text-sm">
