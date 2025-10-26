@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Shield, AlertTriangle, Trophy, Clock, Play, Skull } from 'lucide-react';
 import heroImage from '@/assets/hero-security-doll.png';
+import { LeaderboardPreview } from '@/components/LeaderboardPreview';
 export const Landing = () => {
   const navigate = useNavigate();
   return <div className="min-h-screen bg-gradient-to-br from-background via-pink-950/20 to-background overflow-hidden">
@@ -102,6 +103,9 @@ export const Landing = () => {
             No registration required • Free to play
           </p>
         </div>
+
+        {/* Leaderboard Preview */}
+        <LeaderboardPreview />
 
         {/* Footer */}
         <div className="text-center space-y-2 pb-8">
