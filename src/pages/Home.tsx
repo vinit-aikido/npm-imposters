@@ -289,7 +289,7 @@ export const Home = () => {
                 <li>• Swipe LEFT for malware packages</li>
                 <li>• Swipe RIGHT for safe packages</li>
                 <li>• Score based on accuracy (60%) + speed (40%)</li>
-                <li>• Maximum score: 1000 points</li>
+                <li>• Maximum score: 456 points</li>
               </ul>
             </div>
 
