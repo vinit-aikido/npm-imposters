@@ -21,7 +21,7 @@ const PLAYER_SYMBOLS = [
 
 const playerSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(50, "First name must be less than 50 characters"),
-  companyName: z.string().trim().max(100, "Company name must be less than 100 characters").optional().or(z.literal('')),
+  companyName: z.string().trim().min(1, "Company name is required").max(100, "Company name must be less than 100 characters"),
   email: z.string().trim().email().max(255).optional().or(z.literal('')),
 });
 
@@ -53,7 +53,7 @@ export const Home = () => {
     // Validate fields
     const validation = playerSchema.safeParse({
       firstName: firstName,
-      companyName: companyName || undefined,
+      companyName: companyName,
       email: email || undefined,
     });
 
@@ -178,38 +178,40 @@ export const Home = () => {
           <div className="space-y-6">
             {/* Player Details */}
             <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  First Name <span className="text-destructive">*</span>
-                </label>
-                <Input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value.slice(0, 50))}
-                  maxLength={50}
-                  placeholder="Enter first name"
-                  className={`bg-background border-2 ${errors.firstName ? 'border-destructive' : 'border-border'}`}
-                />
-                {errors.firstName && (
-                  <p className="text-xs text-destructive">{errors.firstName}</p>
-                )}
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    First Name <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value.slice(0, 50))}
+                    maxLength={50}
+                    placeholder="Enter first name"
+                    className={`bg-background border-2 ${errors.firstName ? 'border-destructive' : 'border-border'}`}
+                  />
+                  {errors.firstName && (
+                    <p className="text-xs text-destructive">{errors.firstName}</p>
+                  )}
+                </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  Company Name <span className="text-muted-foreground text-xs">(optional)</span>
-                </label>
-                <Input
-                  type="text"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value.slice(0, 100))}
-                  maxLength={100}
-                  placeholder="Enter company name"
-                  className={`bg-background border-2 ${errors.companyName ? 'border-destructive' : 'border-border'}`}
-                />
-                {errors.companyName && (
-                  <p className="text-xs text-destructive">{errors.companyName}</p>
-                )}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Company Name <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value.slice(0, 100))}
+                    maxLength={100}
+                    placeholder="Enter company name"
+                    className={`bg-background border-2 ${errors.companyName ? 'border-destructive' : 'border-border'}`}
+                  />
+                  {errors.companyName && (
+                    <p className="text-xs text-destructive">{errors.companyName}</p>
+                  )}
+                </div>
               </div>
               
               <div className="space-y-2">
