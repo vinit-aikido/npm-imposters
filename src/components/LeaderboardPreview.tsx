@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Circle, Triangle, Square, Trophy, Medal, Award } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 
 interface LeaderboardEntry {
   id: string;
@@ -15,7 +13,6 @@ interface LeaderboardEntry {
 export const LeaderboardPreview = () => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchTopLeaders();
@@ -158,14 +155,6 @@ export const LeaderboardPreview = () => {
             );
           })}
         </div>
-
-        <Button
-          onClick={() => navigate('/leaderboard')}
-          variant="outline"
-          className="w-full mt-4"
-        >
-          View Full Leaderboard
-        </Button>
       </div>
     </div>
   );
