@@ -33,7 +33,7 @@ export const Home = () => {
   const [email, setEmail] = useState<string>('');
   const [errors, setErrors] = useState<{ firstName?: string; companyName?: string; email?: string }>({});
   const [loading, setLoading] = useState(false);
-  const [jeopardyMode, setJeopardyMode] = useState(false);
+  const [jeopardyMode, setJeopardyMode] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
