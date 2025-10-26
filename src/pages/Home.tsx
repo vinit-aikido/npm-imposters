@@ -298,7 +298,7 @@ export const Home = () => {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <label htmlFor="jeopardy-mode" className="text-sm font-bold text-foreground cursor-pointer">
-                    Add Squid Games Jeopardy (Hard)
+                    Squid Games Jeopardy (Hard)
                   </label>
                   <p className="text-xs text-muted-foreground">
                     High-stakes elimination rounds every 5 questions
