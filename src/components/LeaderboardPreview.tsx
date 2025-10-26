@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 interface LeaderboardEntry {
   id: string;
   first_name: string;
+  company_name: string | null;
   player_symbol: string;
   score: number;
 }
@@ -44,7 +45,7 @@ export const LeaderboardPreview = () => {
     try {
       const { data, error } = await (supabase as any)
         .from('profiles')
-        .select('id, first_name, player_symbol, score')
+        .select('id, first_name, company_name, player_symbol, score')
         .not('score', 'is', null)
         .order('score', { ascending: false })
         .limit(5);
@@ -141,6 +142,11 @@ export const LeaderboardPreview = () => {
                   <div className="font-bold truncate text-foreground text-sm">
                     {entry.first_name || 'Anonymous'}
                   </div>
+                  {entry.company_name && (
+                    <div className="text-xs text-muted-foreground font-normal truncate">
+                      {entry.company_name}
+                    </div>
+                  )}
                 </div>
 
                 {/* Score */}
