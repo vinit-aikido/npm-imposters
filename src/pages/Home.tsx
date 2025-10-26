@@ -21,6 +21,7 @@ const PLAYER_SYMBOLS = [
 
 const playerSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(50, "First name must be less than 50 characters"),
+  companyName: z.string().trim().max(100, "Company name must be less than 100 characters").optional().or(z.literal('')),
   email: z.string().trim().email().max(255).optional().or(z.literal('')),
 });
 
@@ -28,8 +29,9 @@ export const Home = () => {
   const [selectedSymbol, setSelectedSymbol] = useState<string>('circle');
   const [playerNumber, setPlayerNumber] = useState<string>('456');
   const [firstName, setFirstName] = useState<string>('');
+  const [companyName, setCompanyName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
-  const [errors, setErrors] = useState<{ firstName?: string; email?: string }>({});
+  const [errors, setErrors] = useState<{ firstName?: string; companyName?: string; email?: string }>({});
   const [loading, setLoading] = useState(false);
   const [jeopardyMode, setJeopardyMode] = useState(false);
   const navigate = useNavigate();
@@ -51,13 +53,14 @@ export const Home = () => {
     // Validate fields
     const validation = playerSchema.safeParse({
       firstName: firstName,
+      companyName: companyName || undefined,
       email: email || undefined,
     });
 
     if (!validation.success) {
-      const fieldErrors: { firstName?: string; email?: string } = {};
+      const fieldErrors: { firstName?: string; companyName?: string; email?: string } = {};
       validation.error.errors.forEach((err) => {
-        const field = err.path[0] as 'firstName' | 'email';
+        const field = err.path[0] as 'firstName' | 'companyName' | 'email';
         fieldErrors[field] = err.message;
       });
       setErrors(fieldErrors);
@@ -87,6 +90,7 @@ export const Home = () => {
         .upsert({
           id: user.id,
           first_name: firstName || null,
+          company_name: companyName || null,
           email: email || null,
           player_number: playerNumber,
           player_symbol: selectedSymbol,
@@ -105,6 +109,7 @@ export const Home = () => {
       localStorage.setItem('playerSymbol', selectedSymbol);
       localStorage.setItem('playerNumber', playerNumber);
       localStorage.setItem('playerFirstName', firstName);
+      localStorage.setItem('playerCompanyName', companyName);
       localStorage.setItem('playerEmail', email);
       localStorage.setItem('jeopardyMode', jeopardyMode.toString());
       
@@ -187,6 +192,23 @@ export const Home = () => {
                 />
                 {errors.firstName && (
                   <p className="text-xs text-destructive">{errors.firstName}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Company Name <span className="text-muted-foreground text-xs">(optional)</span>
+                </label>
+                <Input
+                  type="text"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value.slice(0, 100))}
+                  maxLength={100}
+                  placeholder="Enter company name"
+                  className={`bg-background border-2 ${errors.companyName ? 'border-destructive' : 'border-border'}`}
+                />
+                {errors.companyName && (
+                  <p className="text-xs text-destructive">{errors.companyName}</p>
                 )}
               </div>
               
