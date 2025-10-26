@@ -145,15 +145,27 @@ const Index = () => {
   };
 
   const calculateScore = (correctAnswers: number, totalQuestions: number, timeInSeconds: number) => {
-    // Accuracy score: 60% weight (max 273.6 points, rounded to 274)
-    const accuracyScore = (correctAnswers / totalQuestions) * 274;
+    // Progressive scoring: more correct answers = higher score
+    // Maximum 456 points only achievable with 45+ correct answers (out of 96 total)
+    let baseScore;
     
-    // Speed bonus: 40% weight (max 182.4 points, rounded to 182)
-    // Optimal time: 3 seconds per question
+    if (correctAnswers >= 45) {
+      // Reached threshold - can achieve full score range
+      // Scale from 380 to 410 based on correct answers beyond 45
+      baseScore = 380 + ((correctAnswers - 45) / (96 - 45)) * 30;
+    } else {
+      // Below threshold - limited max score
+      // Progressive scoring up to 380 points max
+      baseScore = (correctAnswers / 45) * 380;
+    }
+    
+    // Speed bonus: up to 46 points (to reach 456 max)
+    // Faster completion adds bonus points
     const optimalTime = totalQuestions * 3;
-    const speedBonus = Math.max(0, 182 * (1 - (timeInSeconds - optimalTime) / (optimalTime * 3)));
+    const timeFactor = Math.max(0, Math.min(1, 1 - (timeInSeconds - optimalTime) / (optimalTime * 3)));
+    const speedBonus = timeFactor * 46;
     
-    return Math.round(Math.min(456, accuracyScore + speedBonus));
+    return Math.round(Math.min(456, baseScore + speedBonus));
   };
 
   const navigate = useNavigate();
