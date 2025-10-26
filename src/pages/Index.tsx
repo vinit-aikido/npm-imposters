@@ -89,7 +89,10 @@ const Index = () => {
     const wasCorrect = guessedMalware === currentExample.isMalware;
 
     if (wasCorrect) {
-      setScore(score + 1);
+      // Award points based on difficulty
+      const points = currentExample.difficulty === 'hard' ? 3 : 
+                     currentExample.difficulty === 'medium' ? 2 : 1;
+      setScore(score + points);
     }
     setTotalAnswered(totalAnswered + 1);
 
@@ -171,8 +174,8 @@ const Index = () => {
     if (!codeExamples) return;
     
     if (correct) {
-      // Bonus points for surviving elimination round
-      setScore(score + 3); // +150% bonus (1 correct + 2 bonus = 3 total)
+      // Elimination rounds are always hard difficulty (3 points base + 2 bonus = 5 total)
+      setScore(score + 5);
     } else {
       // Penalty for wrong answer in elimination round
       setScore(Math.max(0, score - 2)); // -2 points penalty
