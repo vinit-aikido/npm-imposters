@@ -306,12 +306,13 @@ const Index = () => {
               🔍 NPM Imposters
             </h1>
             <Button
-              variant="ghost"
-              size="icon"
+              variant="outline"
+              size="sm"
               onClick={() => setShowEndDialog(true)}
-              className="text-muted-foreground hover:text-foreground"
+              className="text-malware border-malware/50 hover:bg-malware/10 hover:text-malware font-semibold"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 mr-1" />
+              End Game
             </Button>
           </div>
           <p className="text-muted-foreground">
