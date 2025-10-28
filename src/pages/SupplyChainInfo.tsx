@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, GitFork, FileText, UserX, Package, ArrowLeft } from "lucide-react";
 const SupplyChainInfo = () => {
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   const threats = [{
     icon: AlertTriangle,
     title: "Intentionally Malicious Packages",
@@ -117,7 +122,7 @@ init();`
         return "";
     }
   };
-  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20 flex flex-col items-center justify-center p-4">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20 flex flex-col items-center p-4 pt-8">
       <div className="w-full max-w-6xl space-y-8 animate-fade-in">
         <div className="flex items-center justify-between">
           <Button variant="ghost" size="sm" onClick={() => navigate("/setup")} className="gap-2">
