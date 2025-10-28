@@ -1,0 +1,97 @@
+// Insecure way (vulnerable concept for testing scanner logic)
+// NOTE: This is a conceptual example of what a scanner looks for.
+function renderUserName(name: string): string {
+  return `<h1>Welcome, ${name}</h1>`; // If 'name' is '<script>alert("XSS")</script>', it executes.
+}
+
+// Mitigation: Use a framework (like React, Vue) that auto-encodes, or manually sanitize.
+// Example of a scanner-detectable sink: innerHTML or document.write with unvalidated input.
+
+// Insecure way (vulnerable concept for testing scanner logic)
+// NOTE: This shows a pattern where an application might pass user input directly 
+// to a command execution function without sanitization.
+import { exec } from 'child_process';
+
+function lookupFile(filename: string) {
+    // If 'filename' is 'file.txt; rm -rf /', the system command is altered.
+    exec(`cat ${filename}`, (error, stdout, stderr) => {
+        // ... handle output
+    });
+}
+
+// Mitigation: Use APIs that do not spawn a shell, or strictly validate/sanitize input.
+
+
+import { exec } from 'child_process';
+import * as express from 'express';
+
+const app = express();
+
+// BAD: User input (req.query.filename) is concatenated directly into a shell command.
+app.get('/file-info', (req, res) => {
+    const filename = req.query.filename as string;
+    
+    // If filename is 'report.txt; rm -rf /', a severe command injection occurs.
+    exec(`cat /data/${filename}`, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Exec error: ${error}`);
+            return res.status(500).send('Error retrieving file info.');
+        }
+        res.send(stdout);
+    });
+});
+
+
+// Assume this is a simplified model/service file
+class CommentService {
+    private comments: { user: string, text: string }[] = [];
+
+    // BAD: Stores user text (req.body.text) without sanitization.
+    public addComment(user: string, text: string): void {
+        this.comments.push({ user, text });
+    }
+
+    // BAD: Later retrieves and renders the unsanitized text directly.
+    public renderComments(): string {
+        return this.comments.map(c => 
+            // If c.text contains '<script>...</script>', it executes in the user's browser.
+            `<div><b>${c.user}:</b> ${c.text}</div>`
+        ).join('');
+    }
+}
+
+// In a hypothetical Express route:
+// app.post('/comments', (req, res) => { /* ... add comment ... */ });
+// app.get('/comments', (req, res) => { res.send(service.renderComments()); });
+
+
+// Assume connection and a basic query function exist
+// NOTE: This uses a hypothetical `query` function to demonstrate the SQL pattern.
+async function unsafeQuery(connection: any, userId: string): Promise<any> {
+    
+    // BAD: The userId is directly embedded into the query string.
+    // If userId is '1 OR 1=1 --', the query logic is compromised.
+    const sql = `SELECT * FROM users WHERE id = '${userId}'`;
+    
+    // This is the common "sink" a scanner looks for: a database function 
+    // receiving a query string built with unvalidated external input.
+    const result = await connection.query(sql); 
+    return result;
+}\
+
+import * as express from 'express';
+
+const app = express();
+
+app.post('/calculate', (req, res) => {
+    const expression = req.body.expression as string;
+
+    // BAD: Executes arbitrary code passed in the request body.
+    // An attacker can pass any JavaScript code string here.
+    try {
+        const result = eval(expression); 
+        res.send({ result: result });
+    } catch (e) {
+        res.status(400).send('Invalid expression.');
+    }
+});
