@@ -1,3 +1,5 @@
+// some more stuff 
+
 // Insecure way (vulnerable concept for testing scanner logic)
 // NOTE: This is a conceptual example of what a scanner looks for.
 function renderUserName(name: string): string {
