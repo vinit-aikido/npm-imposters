@@ -7,6 +7,7 @@ import Landing from "./pages/Landing";
 import SupplyChainInfo from "./pages/SupplyChainInfo";
 import Home from "./pages/Home";
 import Index from "./pages/Index";
+import GameCopy from "./pages/GameCopy";
 import SeedDatabase from "./pages/SeedDatabase";
 import NotFound from "./pages/NotFound";
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/learn" element={<SupplyChainInfo />} />
           <Route path="/setup" element={<Home />} />
           <Route path="/game" element={<Index />} />
+          <Route path="/game-2" element={<GameCopy />} />
           <Route path="/seed" element={<SeedDatabase />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
